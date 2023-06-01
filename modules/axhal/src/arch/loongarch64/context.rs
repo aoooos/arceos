@@ -10,9 +10,8 @@ pub struct TrapFrame {
     /// Supervisor Exception Program Counter.
     pub sepc: usize,
     /// Supervisor Status Register.
-    pub sstatus: usize,
+    pub crmd: usize,
 }
-
 
 /// Saved hardware states of a task.
 ///
@@ -29,8 +28,8 @@ pub struct TrapFrame {
 #[repr(C)]
 #[derive(Debug, Default)]
 pub struct TaskContext {
-    pub ra: usize, // return address
-    pub sp: usize, // stack pointer
+    pub ra: usize,      // return address
+    pub sp: usize,      // stack pointer
     pub s: [usize; 10], // loongArch need to save 10 static registers from $r22 to $r31
 }
 

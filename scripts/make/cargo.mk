@@ -47,7 +47,11 @@ ifeq ($(default_features),n)
   build_args += --no-default-features
 endif
 
-rustc_flags := -Clink-args="-T$(LD_SCRIPT) -no-pie"
+ifeq ($(TARGET),loongarch64-unknown-none)
+  rustc_flags := -Clink-args="-T$(LD_SCRIPT) -no-pie" -Clinker="loongarch64-unknown-linux-gnu-ld"
+else
+  rustc_flags := -Clink-args="-T$(LD_SCRIPT) -no-pie"
+endif
 
 define cargo_build
   cargo rustc $(build_args) $(1) -- $(rustc_flags)

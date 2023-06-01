@@ -19,6 +19,12 @@ cfg_if::cfg_if! {
     ))] {
         mod qemu_virt_aarch64;
         pub use self::qemu_virt_aarch64::*;
+    } else if #[cfg(all(
+        target_arch = "loongarch64",
+        feature = "platform-qemu-virt-loongarch64"
+    ))] {
+        mod qemu_virt_loongarch64;
+        pub use self::qemu_virt_loongarch64::*;
     } else {
         mod dummy;
         pub use self::dummy::*;

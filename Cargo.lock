@@ -270,6 +270,7 @@ dependencies = [
  "axalloc",
  "axconfig",
  "axlog",
+ "bit_field",
  "bitflags 2.1.0",
  "cfg-if",
  "crate_interface 0.1.1",
@@ -277,6 +278,7 @@ dependencies = [
  "kernel_guard",
  "lazy_init",
  "log",
+ "loongarch64",
  "memory_addr",
  "page_table",
  "page_table_entry",
@@ -671,10 +673,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "deptool"
-version = "0.1.0"
-
-[[package]]
 name = "driver_block"
 version = "0.1.0"
 dependencies = [
@@ -1034,6 +1032,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "loongarch64"
+version = "0.1.0"
+dependencies = [
+ "bit_field",
 ]
 
 [[package]]

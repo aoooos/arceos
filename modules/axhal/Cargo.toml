@@ -20,6 +20,7 @@ platform-qemu-virt-aarch64 = [
     "axconfig/platform-qemu-virt-aarch64",
     "dep:page_table_entry", "dep:ratio",
 ]
+platform-qemu-virt-loongarch64 = ["axconfig/platform-qemu-virt-loongarch64"]
 default = []
 
 [dependencies]
@@ -50,6 +51,10 @@ raw-cpuid = "10.7"
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
 riscv = "0.10"
 sbi-rt = { version = "0.0.2", features = ["legacy"] }
+
+[target.'cfg(target_arch = "loongarch64")'.dependencies]
+bit_field = "0.10.1"
+loongarch64 = { path = "../../crates/loongarch64" }
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
 aarch64-cpu = "9.3"

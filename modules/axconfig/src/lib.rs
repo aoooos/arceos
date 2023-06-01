@@ -37,6 +37,13 @@ cfg_if::cfg_if! {
         #[rustfmt::skip]
         #[path = "config_qemu_virt_aarch64.rs"]
         mod config;
+    }else if #[cfg(all(
+        any(target_arch = "loongarch64", not(target_os = "none")),
+        feature = "platform-qemu-virt-loongarch64"
+    ))] {
+        #[rustfmt::skip]
+        #[path = "config_qemu_virt_loongarch64.rs"]
+        mod config;
     } else {
         #[rustfmt::skip]
         #[path = "config_dummy.rs"]

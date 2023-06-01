@@ -38,8 +38,12 @@ else ifeq ($(ARCH), aarch64)
   ACCEL ?= n
   PLATFORM ?= qemu-virt-aarch64
   TARGET := aarch64-unknown-none-softfloat
+else ifeq ($(ARCH), loongarch64)
+  ACCEL ?= n
+  PLATFORM ?= qemu-virt-loongarch64
+  TARGET := loongarch64-unknown-none
 else
-  $(error "ARCH" must be one of "x86_64", "riscv64", or "aarch64")
+  $(error "ARCH" must be one of "x86_64", "riscv64", "aarch64" or "loongarch64")
 endif
 
 export ARCH
