@@ -1,5 +1,3 @@
-use riscv::register::satp;
-
 use axconfig::{PHYS_VIRT_OFFSET, TASK_STACK_SIZE};
 
 #[link_section = ".bss.stack"]
@@ -7,19 +5,6 @@ static mut BOOT_STACK: [u8; TASK_STACK_SIZE] = [0; TASK_STACK_SIZE];
 
 #[link_section = ".data.boot_page_table"]
 static mut BOOT_PT: [u64; 512] = [0; 512];
-
-unsafe fn init_boot_page_table() {
-    // 0x8000_0000..0xc000_0000, VRWX_GAD, 1G block
-    BOOT_PT[2] = (0x80000 << 10) | 0xef;
-    // 0xffff_ffc0_8000_0000..0xffff_ffc0_c000_0000, VRWX_GAD, 1G block
-    BOOT_PT[0x102] = (0x80000 << 10) | 0xef;
-}
-
-unsafe fn init_mmu() {
-    let page_table_root = BOOT_PT.as_ptr() as usize;
-    satp::set(satp::Mode::Sv39, 0, page_table_root >> 12);
-    riscv::asm::sfence_vma_all();
-}
 
 /// The earliest entry point for the primary CPU.
 #[naked]
@@ -30,29 +15,31 @@ unsafe extern "C" fn _start() -> ! {
     // a0 = hartid
     // a1 = dtb
     core::arch::asm!("
-        mv      s0, a0                  // save hartid
-        mv      s1, a1                  // save DTB pointer
-        la      sp, {boot_stack}
-        li      t0, {boot_stack_size}
-        add     sp, sp, t0              // setup boot stack
-
-        call    {init_boot_page_table}
-        call    {init_mmu}              // setup boot page table and enabel MMU
-
-        li      s2, {phys_virt_offset}  // fix up virtual high address
-        add     sp, sp, s2
-
-        mv      a0, s0
-        mv      a1, s1
-        la      a2, {entry}
-        add     a2, a2, s2
-        jalr    a2                      // call rust_entry(hartid, dtb)
-        j       .",
+    0:
+        #设置映射窗口
+        li.d $t0,{phys_virt_offset}
+        addi.d $t0,$t0,0x11
+        csrwr $t0,0x180  #设置LOONGARCH_CSR_DMWIN0
+    
+        la.global $t0,1f
+        jirl $zero, $t0,0
+    1:
+        la.global $t0, ebss
+        la.global $t1, sbss
+        bgeu $t0, $t1, 3f   #bge如果前者大于等于后者则跳转
+    2:
+        st.d $zero, $t0,0
+        addi.d $t0, $t0, 8
+        bltu $t0, $t1, 2b
+    3:
+        la.global $sp, {boot_stack}
+        li.d      $t0, {boot_stack_size}
+        add.d       $sp, $sp, $t0     # setup boot stack
+        bl {entry}
+        ",
         phys_virt_offset = const PHYS_VIRT_OFFSET,
         boot_stack_size = const TASK_STACK_SIZE,
         boot_stack = sym BOOT_STACK,
-        init_boot_page_table = sym init_boot_page_table,
-        init_mmu = sym init_mmu,
         entry = sym super::rust_entry,
         options(noreturn),
     )

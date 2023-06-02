@@ -48,7 +48,7 @@ ifeq ($(default_features),n)
 endif
 
 ifeq ($(TARGET),loongarch64-unknown-none)
-  rustc_flags := -Clink-args="-T$(LD_SCRIPT) -no-pie" -Clinker="loongarch64-unknown-linux-gnu-ld"
+  rustc_flags := -Clink-args="-T$(LD_SCRIPT) -no-pie"# -Clinker="loongarch64-linux-gnu-ld"
 else
   rustc_flags := -Clink-args="-T$(LD_SCRIPT) -no-pie"
 endif

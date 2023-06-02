@@ -35,7 +35,7 @@ pub fn gen_offset(symbol: &Ident) -> proc_macro2::TokenStream {
             );
             #[cfg(any(target_arch = "loongarch64"))]
             ::core::arch::asm!(
-                "ld.wu {0}, {VAR}",
+                "la {0}, {VAR}",
                 out(reg) value,
                 VAR = sym #symbol,
             );

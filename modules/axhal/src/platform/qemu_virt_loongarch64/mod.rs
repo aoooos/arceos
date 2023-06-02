@@ -1,5 +1,5 @@
+//mod apic;
 mod boot;
-
 pub mod console;
 pub mod mem;
 pub mod misc;
@@ -35,7 +35,9 @@ unsafe extern "C" fn rust_entry_secondary(cpu_id: usize) {
 /// Initializes the platform devices for the primary CPU.
 ///
 /// For example, the interrupt controller and the timer.
+
 pub fn platform_init() {
+    #[cfg(feature = "irq")]
     self::apic::init_primary();
     self::time::init_primary();
 }
