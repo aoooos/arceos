@@ -1,0 +1,4 @@
+[build]
+target = "loongarch64-unknown-none"
+[target.loongarch64-unknown-none]
+linker = "loongarch64-linux-gnu-gcc"
