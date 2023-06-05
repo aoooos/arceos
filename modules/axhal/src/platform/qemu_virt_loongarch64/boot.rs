@@ -53,6 +53,7 @@ unsafe extern "C" fn _start() -> ! {
 unsafe extern "C" fn _start_secondary() -> ! {
     // a0 = hartid
     // a1 = SP
+    /*
     core::arch::asm!("
         mv      s0, a0                  // save hartid
         mv      sp, a1                  // set SP
@@ -72,5 +73,5 @@ unsafe extern "C" fn _start_secondary() -> ! {
         init_mmu = sym init_mmu,
         entry = sym super::rust_entry_secondary,
         options(noreturn),
-    )
+    )*/
 }

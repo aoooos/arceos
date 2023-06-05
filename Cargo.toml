@@ -42,6 +42,7 @@ members = [
     "crates/scheduler",
     "crates/slab_allocator",
     "crates/spinlock",
+    "crates/loongarch64",
     "crates/timer_list",
     "crates/tuple_for_each",
 

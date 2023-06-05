@@ -1,6 +1,13 @@
 [profile.release]
 lto = true
 [build]
-target = "loongarch64-unknown-none"
+target = ["loongarch64-unknown-none","riscv64gc-unknown-none-elf","x86_64-unknown-none"]
 [target.loongarch64-unknown-none]
-linker = "loongarch64-linux-gnu-gcc"
+#linker = "loongarch64-linux-gnu-gcc"
+linker = "rust-lld"
+[target.riscv64gc-unknown-none-elf]
+#linker = "riscv64-linux-gnu-gcc"
+#linker = "rust-lld"
+[target.x86_64-unknown-none]
+#linker = "x86_64-linux-gnu-gcc"
+#linker = "rust-lld"

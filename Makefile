@@ -27,7 +27,7 @@ endif
 
 # Platform
 ifeq ($(ARCH), x86_64)
-  ACCEL ?= y
+  ACCEL ?= n
   PLATFORM ?= pc-x86
   TARGET := x86_64-unknown-none
 else ifeq ($(ARCH), riscv64)
