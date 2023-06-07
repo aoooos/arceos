@@ -1,4 +1,5 @@
 #![no_std]
+#![allow(unused)]
 pub mod asm;
 pub mod cpu;
 pub mod mem;

@@ -105,7 +105,7 @@
 .endm
 
 .section .text
-.balign 4
+.balign 4096
 .global trap_vector_base
 trap_vector_base:
 

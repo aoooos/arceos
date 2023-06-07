@@ -18,12 +18,12 @@ qemu_args-aarch64 := \
 
 LOONGARCH_BIOS = modules/axhal/src/platform/qemu_virt_loongarch64/loongarch_bios_0310_debug.bin
 qemu_args-loongarch64 := \
-  -machine virt \
   -bios $(LOONGARCH_BIOS) \
-  -kernel $(OUT_BIN)
+  -kernel $(OUT_ELF)\
+  -vga none
 
 ifeq ($(ARCH), loongarch64)
-qemu_args-y := -m 1024M -smp $(SMP) $(qemu_args-$(ARCH))
+qemu_args-y := -m 4G -smp $(SMP) $(qemu_args-$(ARCH))
 else
 qemu_args-y := -m 128M -smp $(SMP) $(qemu_args-$(ARCH))
 endif
