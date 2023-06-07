@@ -16,7 +16,17 @@ qemu_args-aarch64 := \
   -machine virt \
   -kernel $(OUT_BIN)
 
+LOONGARCH_BIOS = modules/axhal/src/platform/qemu_virt_loongarch64/loongarch_bios_0310_debug.bin
+qemu_args-loongarch64 := \
+  -machine virt \
+  -bios $(LOONGARCH_BIOS) \
+  -kernel $(OUT_BIN)
+
+ifeq ($(ARCH), loongarch64)
+qemu_args-y := -m 1024M -smp $(SMP) $(qemu_args-$(ARCH))
+else
 qemu_args-y := -m 128M -smp $(SMP) $(qemu_args-$(ARCH))
+endif
 
 qemu_args-$(FS) += \
   -device virtio-blk-device,drive=disk0 \

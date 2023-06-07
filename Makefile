@@ -64,6 +64,11 @@ endif
 OBJDUMP ?= rust-objdump -d --print-imm-hex --x86-asm-syntax=intel
 OBJCOPY ?= rust-objcopy --binary-architecture=$(ARCH)
 GDB ?= gdb-multiarch
+ifeq ($(ARCH), loongarch64)
+GDB := loongarch64-linux-gnu-gdb
+else ifeq ($(ARCH), riscv64)
+GDB := riscv64-unknown-elf-gdb
+endif
 
 # Paths
 OUT_DIR ?= $(APP)
