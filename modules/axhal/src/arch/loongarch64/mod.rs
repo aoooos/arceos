@@ -35,14 +35,14 @@ pub fn irqs_enabled() -> bool {
 /// It must be called with interrupts enabled, otherwise it will never return.
 #[inline]
 pub fn wait_for_irqs() {
-    unsafe { asm::wfi() }
+    unsafe { loongarch64::asm::idle() }
 }
 
 /// Halt the current CPU.
 #[inline]
 pub fn halt() {
+    unsafe { loongarch64::asm::idle() } // should never return
     disable_irqs();
-    unsafe { asm::wfi() } // should never return
 }
 
 /// Reads the register that stores the current page table root.

@@ -6,6 +6,7 @@
 //! - x86: [`x86_64::X64PTE`]
 //! - ARM: [`aarch64::A64PTE`]
 //! - RISC-V: [`riscv::Rv64PTE`]
+//! - LOONGARCH64: [`loongarch64::LA64PTE`]
 //!
 //! All these types implement the [`GenericPTE`] trait, which provides unified
 //! methods for manipulating various page table entries.

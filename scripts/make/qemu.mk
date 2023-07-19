@@ -23,7 +23,7 @@ qemu_args-loongarch64 := \
   -vga none
 
 ifeq ($(ARCH), loongarch64)
-qemu_args-y := -m 4G -smp $(SMP) $(qemu_args-$(ARCH))
+qemu_args-y := -m 1G -smp $(SMP) $(qemu_args-$(ARCH))
 else
 qemu_args-y := -m 128M -smp $(SMP) $(qemu_args-$(ARCH))
 endif
