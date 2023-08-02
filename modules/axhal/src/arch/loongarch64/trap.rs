@@ -15,7 +15,6 @@ fn handle_breakpoint(era: &mut usize) {
 
 #[no_mangle]
 fn loongarch64_trap_handler(tf: &mut TrapFrame) {
-    debug!("loongarch64_trap_handler()");
     let estat = Estat::read();
     debug!("estat:{:#x?}", estat.get_val());
     debug!("estat.cause():{:#x?})", estat.cause());
@@ -33,5 +32,4 @@ fn loongarch64_trap_handler(tf: &mut TrapFrame) {
             );
         }
     }
-    debug!("end of loongarch64_trap_handler");
 }

@@ -15,21 +15,18 @@ pub use self::context::{TaskContext, TrapFrame};
 /// Allows the current CPU to respond to interrupts.
 #[inline]
 pub fn enable_irqs() {
-    debug!("enable_irqs()");
     unsafe { Crmd::read().set_ie(true).write() }
 }
 
 /// Makes the current CPU to ignore interrupts.
 #[inline]
 pub fn disable_irqs() {
-    debug!("disable_irqs()");
     unsafe { Crmd::read().set_ie(false).write() }
 }
 
 /// Returns whether the current CPU is allowed to respond to interrupts.
 #[inline]
 pub fn irqs_enabled() -> bool {
-    debug!("irqs_enabled()");
     Crmd::read().get_ie()
 }
 
@@ -38,14 +35,12 @@ pub fn irqs_enabled() -> bool {
 /// It must be called with interrupts enabled, otherwise it will never return.
 #[inline]
 pub fn wait_for_irqs() {
-    debug!("wait_for_irqs()");
     unsafe { loongarch64::asm::idle() }
 }
 
 /// Halt the current CPU.
 #[inline]
 pub fn halt() {
-    debug!("halt()");
     unsafe { loongarch64::asm::idle() } // should never return
     disable_irqs();
 }
@@ -55,7 +50,6 @@ pub fn halt() {
 /// Returns the physical address of the page table root.
 #[inline]
 pub fn read_page_table_root() -> PhysAddr {
-    debug!("read_page_table_root()");
     PhysAddr::from(Pgd::read().pgd)
 }
 
@@ -65,7 +59,6 @@ pub fn read_page_table_root() -> PhysAddr {
 ///
 /// This function is unsafe as it changes the virtual memory address space.
 pub unsafe fn write_page_table_root(root_paddr: PhysAddr) {
-    debug!("write_page_table_root({:#x})", root_paddr);
     let old_root = read_page_table_root();
     trace!("set page table root: {:#x} => {:#x}", old_root, root_paddr);
     if old_root != root_paddr {
@@ -79,7 +72,6 @@ pub unsafe fn write_page_table_root(root_paddr: PhysAddr) {
 /// entry that maps the given virtual address.
 #[inline]
 pub fn flush_tlb(vaddr: Option<VirtAddr>) {
-    debug!("flush_tlb()");
     unsafe {
         if let Some(vaddr) = vaddr {
             asm!("invtlb 0x6,$r0,{}", in(reg) vaddr.as_usize());
