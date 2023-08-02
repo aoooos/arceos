@@ -20,7 +20,7 @@ platform-qemu-virt-aarch64 = [
     "axconfig/platform-qemu-virt-aarch64",
     "dep:page_table_entry", "dep:ratio",
 ]
-platform-qemu-virt-loongarch64 = ["axconfig/platform-qemu-virt-loongarch64"]
+platform-qemu-virt-loongarch64 = ["axconfig/platform-qemu-virt-loongarch64", "dep:ratio"]
 default = []
 
 [dependencies]

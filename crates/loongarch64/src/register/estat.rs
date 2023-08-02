@@ -16,14 +16,14 @@ impl Register for Estat {
         let mut bits;
         unsafe {
             // asm!("csrrd {},{}", out(reg) bits,const CSR_ESTAT);
-            asm!("csrrd {},0x5", out(reg) bits);
+            asm!("csrrd {}, 0x5", out(reg) bits);
         }
         Estat { bits }
     }
     fn write(&mut self) {
         unsafe {
             // asm!("csrwr {},{}", in(reg) self.bits,const CSR_ESTAT);
-            asm!("csrwr {},0x5", in(reg) self.bits);
+            asm!("csrwr {}, 0x5", in(reg) self.bits);
         }
     }
 }

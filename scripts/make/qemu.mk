@@ -1,7 +1,7 @@
 # QEMU arguments
 
-QEMU := qemu-system-$(ARCH)
-
+#QEMU := qemu-system-$(ARCH)
+QEMU := /media/psf/SSD/OS/arceos-env/qemu-loongarch-runenv/qemu/x86_64/qemu-system-loongarch64
 qemu_args-x86_64 := \
   -machine q35 \
   -kernel $(OUT_ELF)

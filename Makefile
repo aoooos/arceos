@@ -13,7 +13,7 @@ FS ?= n
 NET ?= n
 GRAPHIC ?= n
 
-QEMU_LOG ?= n
+QEMU_LOG ?= y
 
 ifeq ($(wildcard $(APP)),)
   $(error Application path "$(APP)" is not valid)
@@ -65,7 +65,8 @@ OBJDUMP ?= rust-objdump -d --print-imm-hex --x86-asm-syntax=intel
 OBJCOPY ?= rust-objcopy --binary-architecture=$(ARCH)
 GDB ?= gdb-multiarch
 ifeq ($(ARCH), loongarch64)
-GDB := loongarch64-linux-gnu-gdb
+#GDB := loongarch64-linux-gnu-gdb
+GDB :=/media/psf/SSD/OS/arceos-env/gdb/build/gdb/gdb
 else ifeq ($(ARCH), riscv64)
 GDB := riscv64-unknown-elf-gdb
 endif
@@ -103,6 +104,21 @@ debug: build
 	  -ex 'target remote localhost:1234' \
 	  -ex 'b rust_entry' \
 	  -ex 'continue' \
+	  -ex 'disp /16i $$pc'
+
+LAdebug: build
+	$(call run_qemu_debug) &
+	sleep 1
+	$(GDB) $(OUT_ELF) \
+	  -ex 'set architecture Loongarch64'\
+	  -ex 'target remote localhost:1234' \
+	  -ex 'b *0x2000'\
+	  -ex 'b rust_main'\
+	  -ex 'b loongarch64_trap_handler'\
+	  -ex 'b *0x92b0'\
+	  -ex 'b *0x20b0'\
+	  -ex 'b *0x20b8'\
+	  -ex 'b *0x214c'\
 	  -ex 'disp /16i $$pc'
 
 clippy:

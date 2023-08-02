@@ -7,10 +7,20 @@ use memory_addr::VirtAddr;
 pub struct TrapFrame {
     /// All general registers.
     pub regs: [usize; 32],
-    /// Supervisor Exception Program Counter.
-    pub sepc: usize,
-    /// Supervisor Status Register.
+    /// Current Mode Information
     pub crmd: usize,
+    /// Pre-exception Mode Information
+    pub prmd: usize,
+    /// Extended Component Unit Enable
+    pub euen: usize,
+    /// Exception Configuration 
+    pub ecfg: usize,
+    /// Exception Status
+    pub estat: usize,
+    /// Exception Return Address
+    pub era: usize,
+    /// Bad Virtual Address
+    pub badv: usize,
 }
 
 /// Saved hardware states of a task.

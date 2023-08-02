@@ -3,8 +3,6 @@
 use core::fmt;
 use memory_addr::PhysAddr;
 
-use loongarch64;
-
 use crate::{GenericPTE, MappingFlags};
 
 bitflags::bitflags! {
@@ -96,7 +94,7 @@ impl From<MappingFlags> for PTEFlags {
 pub struct LA64PTE(u64);
 
 impl LA64PTE {
-    const PHYS_ADDR_MASK: u64 = (1 << loongarch64::PALEN) - (1 << 12); // bits 12..PALEN
+    const PHYS_ADDR_MASK: u64 = (1 << 48) - (1 << 12); // bits 12..48
 }
 
 impl GenericPTE for LA64PTE {
