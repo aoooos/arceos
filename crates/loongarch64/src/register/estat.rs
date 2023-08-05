@@ -81,27 +81,27 @@ impl Estat {
         }
         let sub_ecode = self.get_esubcode();
         match ecode {
-            0x1 => Trap::Exception(Exception::LoadPageFault), // load
-            0x2 => Trap::Exception(Exception::StorePageFault), // store
-            0x3 => Trap::Exception(Exception::FetchPageFault), //取指操作页面不存在
-            0x4 => Trap::Exception(Exception::PageModifyFault), //页修改例外
-            0x5 => Trap::Exception(Exception::PageNotReadFault), //页不可读
-            0x6 => Trap::Exception(Exception::PageNotExecuteFault), //页不可执行
+            0x1 => Trap::Exception(Exception::LoadPageInvalid), // load
+            0x2 => Trap::Exception(Exception::StorePageInvalid), // store
+            0x3 => Trap::Exception(Exception::FetchPageInvalid), //取指操作页面不存在
+            0x4 => Trap::Exception(Exception::PageModification), //页修改例外
+            0x5 => Trap::Exception(Exception::PageNonReadable), //页不可读
+            0x6 => Trap::Exception(Exception::PageNonExecutable), //页不可执行
             0x7 => Trap::Exception(Exception::PagePrivilegeIllegal), //页特权级不合规
             0x8 => {
                 match sub_ecode {
                     0x1 => Trap::Exception(Exception::FetchInstructionAddressError), //取指地址错误
-                    0x2 => Trap::Exception(Exception::MemoryAccessError), //访存地址访问错误
+                    0x2 => Trap::Exception(Exception::MemoryAccessInstructionAddressError), //访存地址访问错误
                     _ => Trap::Unknown,
                 }
             }
-            0x9 => Trap::Exception(Exception::AddressNotAligned), //地址不对齐
-            0xa => Trap::Exception(Exception::BoundsCheckFault),  //越界例外
-            0xb => Trap::Exception(Exception::Syscall),           //系统调用
-            0xc => Trap::Exception(Exception::Breakpoint),        //调试中断
-            0xd => Trap::Exception(Exception::InstructionNotExist), //指令不合规
-            0xe => Trap::Exception(Exception::InstructionPrivilegeIllegal), //指令特权级不合规
-            0xf => Trap::Exception(Exception::FloatingPointUnavailable), //浮点处理器不可用
+            0x9 => Trap::Exception(Exception::AddressAlignmentFault), //地址不对齐
+            0xa => Trap::Exception(Exception::BoundCheck),            //越界例外
+            0xb => Trap::Exception(Exception::Syscall),               //系统调用
+            0xc => Trap::Exception(Exception::Breakpoint),            //调试中断
+            0xd => Trap::Exception(Exception::InstructionNonDefined), //指令不合规
+            0xe => Trap::Exception(Exception::InstructionPrivilegeError), //指令特权级不合规
+            0xf => Trap::Exception(Exception::FloatingPointInstructionDisable), //浮点处理器不可用
             _ => Trap::Unknown,
         }
     }
@@ -110,23 +110,23 @@ impl Estat {
 // 异常类型
 #[derive(Debug, Clone, Copy)]
 pub enum Exception {
-    LoadPageFault,
-    StorePageFault,
-    FetchPageFault,
-    PageModifyFault,
-    PageNotReadFault,
-    PageNotExecuteFault,
+    LoadPageInvalid,
+    StorePageInvalid,
+    FetchPageInvalid,
+    PageModification,
+    PageNonReadable,
+    PageNonExecutable,
     PagePrivilegeIllegal,
     FetchInstructionAddressError,
-    MemoryAccessError,                 //内存访问错误
-    AddressNotAligned,                 //地址不对齐
-    BoundsCheckFault,                  //越界检查错误
-    Syscall = 0xB,                     //系统调用
-    Breakpoint = 0xC,                  //调试中断
-    InstructionNotExist = 0xD,         //指令不合规
-    InstructionPrivilegeIllegal = 0xE, //特权指令不合规
-    FloatingPointUnavailable = 0xF,    //浮点不可用
-    TLBRFill,                          //TLB重填
+    MemoryAccessInstructionAddressError,   //内存访问错误
+    AddressAlignmentFault = 0x9,           //地址不对齐
+    BoundCheck = 0xA,                      //越界检查错误
+    Syscall = 0xB,                         //系统调用
+    Breakpoint = 0xC,                      //调试中断
+    InstructionNonDefined = 0xD,           //指令不合规
+    InstructionPrivilegeError = 0xE,       //特权指令不合规
+    FloatingPointInstructionDisable = 0xF, //浮点不可用
+    TLBRFill,                              //TLB重填
 }
 
 // 中断类型

@@ -16,6 +16,7 @@
 //! - x86: [`x86_64::X64PageTable`]
 //! - ARM: [`aarch64::A64PageTable`]
 //! - RISC-V: [`riscv::Sv39PageTable`], [`riscv::Sv48PageTable`]
+//! - LoongArch64: [`loongarch64::LA64PageTable`]
 
 #![no_std]
 #![feature(const_trait_impl)]

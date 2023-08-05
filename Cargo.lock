@@ -88,6 +88,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "arceos-latest"
+version = "0.1.0"
+dependencies = [
+ "libax",
+ "log",
+ "loongarch64",
+]
+
+[[package]]
 name = "arceos-memtest"
 version = "0.1.0"
 dependencies = [

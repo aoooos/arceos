@@ -4,11 +4,11 @@ use super::super::register::csr::Register;
 use super::super::register::csr::CSR_STLBPS;
 use bit_field::BitField;
 use core::arch::asm;
-pub struct SltbPs {
+pub struct StlbPs {
     bits: u32,
 }
 
-impl Register for SltbPs {
+impl Register for StlbPs {
     fn read() -> Self {
         let bits: u32;
         // unsafe { asm!("csrrd {},{}",out(reg)bits,const CSR_STLBPS) }
@@ -21,7 +21,7 @@ impl Register for SltbPs {
     }
 }
 
-impl SltbPs {
+impl StlbPs {
     pub fn get_page_size(&self) -> u32 {
         self.bits.get_bits(0..=5)
     }

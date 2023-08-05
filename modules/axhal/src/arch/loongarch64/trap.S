@@ -99,18 +99,10 @@
 
 	ld.d	$tp, $sp, 8*2   // thread pointer
 	ld.d	$fp, $sp, 8*22  // frame pointer
-
 .endm
 
 
 .macro SAVE_REGS
-	// csrrd		$t0, 0x33
-	// la.pcrel	$t1, kernelsp
-	// add.d		$t1, $t1, $t0
-	// move		$t2, $sp
-	// ld.d		$sp, $t1, 0
-
-
 	addi.d		$sp, $sp, -{trapframe_size} // allocate space
 	st.d		$t2, $sp, 8*3   // sp
 	st.d		$zero, $sp, 8*0 // zero
@@ -131,11 +123,8 @@
 
     SAVE_STATIC_REGS
 
-	// move	$r21, $t0
-	// li.d	$tp, ~_THREAD_MASK
-	// and		$tp, $tp, $sp
-
 	move	$r21, $sp
+	move	$a0, $sp
 .endm
 
 
@@ -147,7 +136,6 @@
 
     LOAD_SOME_REGS
 
-	
 	//ld.d	$sp, $sp, 8*3   // sp
 	addi.d		$sp, $sp, {trapframe_size}
 	csrrd		$r21, 0x6
@@ -155,11 +143,27 @@
 	csrwr		$r21, 0x6
 .endm
 
+/*
+.macro tlb_do_page_fault, write
+	SAVE_REGS
+
+	csrrd		$a2, 0x7
+	move		$a0, $sp
+	st.d		$a2, $sp, 8*38
+	li.d		$a1, \write
+	bl			do_page_fault
+
+	LOAD_REGS
+
+	ertn
+.endm
+*/
+
+
 .section .text
 .balign 4096
 .global trap_vector_base
 trap_vector_base:
-
     SAVE_REGS
 
     bl loongarch64_trap_handler
@@ -168,3 +172,21 @@ trap_vector_base:
 
     ertn
 
+
+.section .text.tlbrefill
+.balign 4096
+.global tlb_refill_handler
+tlb_refill_handler:
+    csrwr $t0, 0x8B	// tlbrsave
+    csrrd $t0, 0x1B	// pgd
+    lddir $t0, $t0, 4
+	lddir $t0, $t0, 3 
+	lddir $t0, $t0, 2
+    lddir $t0, $t0, 1 
+    ldpte $t0, 0	#取回偶数号页表项
+		// csrrd $t0, 0x8c
+    ldpte $t0, 1 	#取回奇数号页表项
+		// csrrd $t0, 0x8d
+    tlbfill
+    csrrd $t0, 0x8B	// tlbrsave
+    ertn

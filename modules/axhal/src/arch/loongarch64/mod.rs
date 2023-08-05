@@ -4,10 +4,11 @@
 mod context;
 mod trap;
 
+use bit_field::BitField;
 use core::arch::asm;
 use loongarch64::asm;
 use loongarch64::register::{crmd::Crmd, csr::Register, eentry::Eentry};
-use loongarch64::tlb::{Pgd, Pgdl};
+use loongarch64::tlb::{Pgd, Pgdh, Pgdl, StlbPs, TLBREntry, TlbREhi};
 use memory_addr::{PhysAddr, VirtAddr};
 
 pub use self::context::{TaskContext, TrapFrame};
@@ -63,6 +64,7 @@ pub unsafe fn write_page_table_root(root_paddr: PhysAddr) {
     trace!("set page table root: {:#x} => {:#x}", old_root, root_paddr);
     if old_root != root_paddr {
         Pgdl::read().set_val(root_paddr.into()).write(); //设置新的页基址
+        Pgdh::read().set_val(root_paddr.into()).write(); //设置新的页基址
     }
 }
 
@@ -73,16 +75,37 @@ pub unsafe fn write_page_table_root(root_paddr: PhysAddr) {
 #[inline]
 pub fn flush_tlb(vaddr: Option<VirtAddr>) {
     unsafe {
+        /*
         if let Some(vaddr) = vaddr {
             asm!("invtlb 0x6,$r0,{}", in(reg) vaddr.as_usize());
         } else {
             asm!("invtlb 0,$r0,$r0");
-        }
+        }*/
+        asm!("tlbflush");
     }
 }
 
-/// Writes Supervisor Trap Vector Base Address Register (`stvec`).
+/// Writes Exception Entry Base Address Register (`eentry`).
 #[inline]
 pub fn set_trap_vector_base(eentry: usize) {
     Eentry::read().set_eentry(eentry).write();
 }
+
+/// Writes TLB Refill Exception Entry Base Address (`tlbrentry`).
+#[inline]
+pub fn set_tlb_refill(tlb_refill_entry: usize) {
+    StlbPs::read().set_page_size(0xc).write(); //设置TLB的页面大小为4KiB
+                                               //TlbREhi::read().set_page_size(0xc).write(); //设置TLB的页面大小为4KiB
+    TLBREntry::read()
+        .set_val((tlb_refill_entry as usize).get_bits(0..32))
+        .write();
+}
+/*
+/// Writes TLB Refill Exception Entry Base Address (`tlbrentry`).
+#[inline]
+pub fn set_tlb_handler(tlb_refill_entry: usize) {
+    TLBREntry::read()
+        .set_val((tlb_refill_entry as usize).get_bits(0..32))
+        .write();
+}
+*/

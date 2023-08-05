@@ -65,8 +65,8 @@ OBJDUMP ?= rust-objdump -d --print-imm-hex --x86-asm-syntax=intel
 OBJCOPY ?= rust-objcopy --binary-architecture=$(ARCH)
 GDB ?= gdb-multiarch
 ifeq ($(ARCH), loongarch64)
-#GDB := loongarch64-linux-gnu-gdb
-GDB :=/media/psf/SSD/OS/arceos-env/gdb/build/gdb/gdb
+GDB := loongarch64-linux-gnu-gdb
+#GDB :=/media/psf/SSD/OS/arceos-env/gdb/build/gdb/gdb
 else ifeq ($(ARCH), riscv64)
 GDB := riscv64-unknown-elf-gdb
 endif
@@ -113,12 +113,12 @@ LAdebug: build
 	  -ex 'set architecture Loongarch64'\
 	  -ex 'target remote localhost:1234' \
 	  -ex 'b *0x2000'\
+	  -ex 'b _start'\
+	  -ex 'b main'\
 	  -ex 'b rust_main'\
+	  -ex 'b rust_entry'\
 	  -ex 'b loongarch64_trap_handler'\
-	  -ex 'b *0x92b0'\
-	  -ex 'b *0x20b0'\
-	  -ex 'b *0x20b8'\
-	  -ex 'b *0x214c'\
+	  -ex 'b *0x3000'\
 	  -ex 'disp /16i $$pc'
 
 clippy:

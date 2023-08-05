@@ -1,10 +1,29 @@
 use axconfig::{PHYS_VIRT_OFFSET, TASK_STACK_SIZE};
-
+use loongarch64::register::csr::Register;
+use loongarch64::tlb::pwch::Pwch;
+use loongarch64::tlb::pwcl::Pwcl;
 #[link_section = ".bss.stack"]
 static mut BOOT_STACK: [u8; TASK_STACK_SIZE] = [0; TASK_STACK_SIZE];
 
 #[link_section = ".data.boot_page_table"]
 static mut BOOT_PT: [u64; 512] = [0; 512];
+
+unsafe fn init_mmu() {
+    Pwcl::read()
+        .set_ptbase(12) //页表起始位置
+        .set_ptwidth(9) //页表宽度为9位
+        .set_dir1_base(21) //第一级页目录表起始位置
+        .set_dir1_width(9) //第一级页目录表宽度为9位
+        .set_dir2_base(30) //第二级页目录表起始位置
+        .set_dir2_width(9) //第二级页目录表宽度为9位
+        .write();
+    Pwch::read()
+        .set_dir3_base(39) //第三级页目录表
+        .set_dir3_width(9) //第三级页目录表宽度为9位
+        //.set_dir4_base(48) //第四级页目录表
+        .set_dir4_width(0) //第四级页目录表宽度为9位
+        .write();
+}
 
 /// The earliest entry point for the primary CPU.
 #[naked]
@@ -45,33 +64,36 @@ unsafe extern "C" fn _start() -> ! {
     // )
     // core::arch::asm!("bl {entry}",entry = sym super::rust_entry,options(noreturn),)
     core::arch::asm!("
-        0:
             # config direct window (inspired from linux source code)
             ori $t0, $zero, 0x1     # CSR_DMW1_PLV0
             lu52i.d $t0, $t0, -2048 # UC, PLV0, 0x8000 xxxx xxxx xxxx
-            csrwr $t0,0x180  #LOONGARCH_CSR_DMWIN0
+            csrwr $t0,0x180         #LOONGARCH_CSR_DMWIN0
 
             ori $t0, $zero, 0x11    # CSR_DMW1_MAT | CSR_DMW1_PLV0
             lu52i.d $t0, $t0, -1792 # CA, PLV0, 0x9000 xxxx xxxx xxxx
-            csrwr $t0,0x181 #LOONGARCH_CSR_DMWIN1
+            csrwr $t0,0x181         #LOONGARCH_CSR_DMWIN1
             
             # Enable PG 
             li.w		$t0, 0xb0		# PLV=0, IE=0, PG=1
-            csrwr		$t0, 0x0         # LOONGARCH_CSR_CRMD
+            csrwr		$t0, 0x0        # LOONGARCH_CSR_CRMD
             li.w		$t0, 0x04		# PLV=0, PIE=1, PWE=0
-            csrwr		$t0, 0x1         # LOONGARCH_CSR_PRMD
+            csrwr		$t0, 0x1        # LOONGARCH_CSR_PRMD
             li.w		$t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
-            csrwr		$t0, 0x2         # LOONGARCH_CSR_EUEN
+            csrwr		$t0, 0x2        # LOONGARCH_CSR_EUEN
+            
+            bl        {init_mmu}
 
             la.global   $sp, {boot_stack}
             li.d        $t0, {boot_stack_size}
             add.d       $sp, $sp, $t0              // setup boot stack
-
+            
+            csrrd       $a0, 0x20
             bl {entry}
             ",
         boot_stack_size = const TASK_STACK_SIZE,
         boot_stack = sym BOOT_STACK,
         entry = sym super::rust_entry,
+        init_mmu = sym init_mmu,
         options(noreturn),
     )
 }
