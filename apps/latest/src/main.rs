@@ -169,7 +169,6 @@ pub fn test_csr_register() {
     let tlbrelo1 = TlbRelo::read(1);
     info!("{:#x?}", tlbrelo0);
     info!("{:#x?}", tlbrelo1);
-    info!("pte : {:#x}", pt);
 
     //查看计时器配置
     let tcfg = Tcfg::read();
