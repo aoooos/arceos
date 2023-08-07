@@ -1109,6 +1109,7 @@ name = "page_table_entry"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.3.3",
+ "log",
  "loongarch64",
  "memory_addr",
  "x86_64",

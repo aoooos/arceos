@@ -1,9 +1,9 @@
 //! loongarch64 page table entries.
 
-use core::fmt;
-use memory_addr::PhysAddr;
-
 use crate::{GenericPTE, MappingFlags};
+use core::fmt;
+use log::info;
+use memory_addr::PhysAddr;
 
 bitflags::bitflags! {
     /// Page-table entry flags.
@@ -108,6 +108,8 @@ impl GenericPTE for LA64PTE {
                 | flags.bits() as u64
                 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK),
         )*/
+        info!("paddr={:#x?}", paddr);
+        info!("flags={:#x?}", flags);
         Self(flags.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
     }
     fn new_table(paddr: PhysAddr) -> Self {

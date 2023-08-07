@@ -153,9 +153,29 @@ pub fn test_csr_register() {
 
     unsafe { asm!("csrrd {}, 0x1B",out(reg)pgd) };
     unsafe { asm!("lddir {}, {}, 4",out(reg)dir3,in(reg)pgd) };
+    unsafe {
+        asm!("
+    bstrpick.d {d}, {d}, 63, 12
+    slli.d {d}, {d}, 12",d=inout(reg)dir3)
+    };
     unsafe { asm!("lddir {}, {}, 3",out(reg)dir2,in(reg)dir3) };
+    unsafe {
+        asm!("
+    bstrpick.d {d}, {d}, 63, 12
+    slli.d {d}, {d}, 12",d=inout(reg)dir2)
+    };
     unsafe { asm!("lddir {}, {}, 2",out(reg)dir1,in(reg)dir2) };
+    unsafe {
+        asm!("
+    bstrpick.d {d}, {d}, 63, 12
+    slli.d {d}, {d}, 12",d=inout(reg)dir1)
+    };
     unsafe { asm!("lddir {}, {}, 1",out(reg)pt,in(reg)dir1) };
+    unsafe {
+        asm!("
+    bstrpick.d {d}, {d}, 63, 12
+    slli.d {d}, {d}, 12",d=inout(reg)pt)
+    };
     info!("dir3 : {:#x}", dir3);
     info!("dir2 : {:#x}", dir2);
     info!("dir1 : {:#x}", dir1);

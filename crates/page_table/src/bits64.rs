@@ -146,6 +146,9 @@ impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> PageTable64<M, PTE, IF> {
         let mut paddr = paddr;
         let mut size = size;
         while size > 0 {
+            info!("vaddr={:#x?}", vaddr);
+            info!("paddr={:#x?}", paddr);
+            info!("size={:#x?}", size);
             let page_size = if allow_huge {
                 if vaddr.is_aligned(PageSize::Size1G)
                     && paddr.is_aligned(PageSize::Size1G)
@@ -248,6 +251,13 @@ impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> PageTable64<M, PTE, IF> {
     }
 
     fn next_table_mut<'a>(&self, entry: &PTE) -> PagingResult<&'a mut [PTE]> {
+        /*\\
+        #[cfg(target_arch = "loongarch64")]
+        if !entry.is_present() {
+        return Ok(self.table_of_mut(entry.paddr()));
+        }
+        */
+        //return Ok(self.table_of_mut(entry.paddr()));
         if !entry.is_present() {
             Err(PagingError::NotMapped)
         } else if entry.is_huge() {

@@ -18,3 +18,4 @@ x86_64 = "0.14"
 
 [target.'cfg(target_arch = "loongarch64")'.dependencies]
 loongarch64 = { path = "../loongarch64" }
+log = "0.4"

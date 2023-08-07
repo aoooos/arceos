@@ -112,13 +112,12 @@ LAdebug: build
 	$(GDB) $(OUT_ELF) \
 	  -ex 'set architecture Loongarch64'\
 	  -ex 'target remote localhost:1234' \
-	  -ex 'b *0x2000'\
 	  -ex 'b _start'\
 	  -ex 'b main'\
 	  -ex 'b rust_main'\
 	  -ex 'b rust_entry'\
 	  -ex 'b loongarch64_trap_handler'\
-	  -ex 'b *0x3000'\
+	  -ex 'b *0x202000'\
 	  -ex 'disp /16i $$pc'
 
 clippy:

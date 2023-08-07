@@ -73,6 +73,8 @@ unsafe extern "C" fn _start() -> ! {
             lu52i.d $t0, $t0, -1792 # CA, PLV0, 0x9000 xxxx xxxx xxxx
             csrwr $t0,0x181         #LOONGARCH_CSR_DMWIN1
             
+            bl          {init_mmu}
+
             # Enable PG 
             li.w		$t0, 0xb0		# PLV=0, IE=0, PG=1
             csrwr		$t0, 0x0        # LOONGARCH_CSR_CRMD
@@ -81,8 +83,6 @@ unsafe extern "C" fn _start() -> ! {
             li.w		$t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
             csrwr		$t0, 0x2        # LOONGARCH_CSR_EUEN
             
-            bl        {init_mmu}
-
             la.global   $sp, {boot_stack}
             li.d        $t0, {boot_stack_size}
             add.d       $sp, $sp, $t0              // setup boot stack
