@@ -20,11 +20,10 @@ use loongarch64::register::prcfg2::Prcfg2;
 use loongarch64::register::prcfg3::Prcfg3;
 use loongarch64::register::tcfg::Tcfg;
 use loongarch64::register::Misc;
-use loongarch64::tlb::Pwch;
-use loongarch64::tlb::TLBREntry;
-use loongarch64::tlb::TlbREhi;
 use loongarch64::tlb::TLBELO;
-use loongarch64::tlb::{Pwcl, StlbPs};
+use loongarch64::tlb::{Pgd, Pgdh, Pgdl, Pwch, Pwcl, StlbPs};
+use loongarch64::tlb::{TLBREntry, TlbRelo};
+use loongarch64::tlb::{TlbREhi, TLBEL};
 
 // 打印硬件的相关信息
 pub fn print_machine_info() {
@@ -69,21 +68,26 @@ pub fn print_machine_info() {
         pwcl.get_ptwidth()
     ); //PT的索引宽度
     info!(
-        "PMDT-index-width: {},{}",
+        "dir1-index-width: {},{}",
         pwcl.get_dir1_base(),
         pwcl.get_dir1_width()
-    ); //PMDT的索引宽度
+    ); //dir1的索引宽度
     let pwch = Pwch::read();
     info!(
-        "PUDT-index-width: {},{}",
-        pwch.get_dir3_base(),
-        pwch.get_dir3_width()
-    ); //PUDT的索引宽度
+        "dir2-index-width: {},{}",
+        pwcl.get_dir2_base(),
+        pwcl.get_dir2_width()
+    ); //dir2的索引宽度
     info!(
-        "PGDT-index-width: {},{}",
+        "dir3-index-width: {},{}",
         pwch.get_dir3_base(),
         pwch.get_dir3_width()
-    ); //PGDT的索引宽度
+    ); //dir3的索引宽度
+    info!(
+        "dir4-index-width: {},{}",
+        pwch.get_dir4_base(),
+        pwch.get_dir4_width()
+    ); //dir4的索引宽度
     let crmd = Crmd::read();
     info!("DA: {}", crmd.get_da()); //是否支持DA模式
     info!("PG :{}", crmd.get_pg()); //是否支持PG模式
@@ -109,7 +113,7 @@ pub fn checkout_after_init() {
 
 pub fn test_csr_register() {
     let estat = Estat::read();
-    info!("\nestat = {:#x}", estat.get_val());
+    info!("estat = {:#x}", estat.get_val());
     // 打印当前的特权级
     let crmd = Crmd::read();
     let spp = crmd.get_plv();
@@ -132,6 +136,40 @@ pub fn test_csr_register() {
     info!("save register num:{}", prc);
     info!("timer bits:{}", time_bits);
     info!("{:?}", prcfg1);
+
+    //查看页表相关
+    let pgdh = Pgdh::read();
+    let pgdh = pgdh.get_val();
+    let pgdl = Pgdl::read();
+    let pgdl = pgdl.get_val();
+    let pgd = Pgd::read();
+    let pgd = pgd.get_val();
+    info!("Pgdh = {:#x}", pgdh);
+    info!("Pgdl = {:#x}", pgdl);
+    info!("Pgd = {:#x}", pgd);
+
+    let mut pgd: u32;
+    let mut dir3: u32;
+    let mut dir2: u32;
+    let mut dir1: u32;
+    let mut pt: u32;
+
+    unsafe { asm!("csrrd {}, 0x1B",out(reg)pgd) };
+    unsafe { asm!("lddir {}, {}, 4",out(reg)dir3,in(reg)pgd) };
+    unsafe { asm!("lddir {}, {}, 3",out(reg)dir2,in(reg)dir3) };
+    unsafe { asm!("lddir {}, {}, 2",out(reg)dir1,in(reg)dir2) };
+    unsafe { asm!("lddir {}, {}, 1",out(reg)pt,in(reg)dir1) };
+    info!("dir3 : {:#x}", dir3);
+    info!("dir2 : {:#x}", dir2);
+    info!("dir1 : {:#x}", dir1);
+    info!("pt : {:#x}", pt);
+    unsafe { asm!("ldpte {}, 0",in(reg)pt) };
+    unsafe { asm!("ldpte {}, 1",in(reg)pt) };
+    let tlbrelo0 = TlbRelo::read(0);
+    let tlbrelo1 = TlbRelo::read(1);
+    info!("{:#x?}", tlbrelo0);
+    info!("{:#x?}", tlbrelo1);
+    info!("pte : {:#x}", pt);
 
     //查看计时器配置
     let tcfg = Tcfg::read();

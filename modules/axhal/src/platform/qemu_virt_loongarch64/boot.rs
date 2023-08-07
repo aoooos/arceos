@@ -21,7 +21,7 @@ unsafe fn init_mmu() {
         .set_dir3_base(39) //第三级页目录表
         .set_dir3_width(9) //第三级页目录表宽度为9位
         //.set_dir4_base(48) //第四级页目录表
-        .set_dir4_width(0) //第四级页目录表宽度为9位
+        .set_dir4_width(0) //第四级页目录表
         .write();
 }
 

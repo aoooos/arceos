@@ -107,11 +107,11 @@ impl TLBEL for TlbRelo {
     }
 
     fn get_ppn(&self, palen: usize) -> usize {
-        self.bits.get_bits(14..palen)
+        self.bits.get_bits(12..palen)
     }
 
     fn set_ppn(&mut self, palen: usize, ppn: usize) -> &mut Self {
-        self.bits.set_bits(14..palen, ppn);
+        self.bits.set_bits(12..palen, ppn);
         self
     }
 

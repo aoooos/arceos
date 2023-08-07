@@ -74,19 +74,23 @@ impl Pwcl {
     pub fn get_pte_width(&self) -> u32 {
         let val = self.bits.get_bits(30..=31);
         match val {
-            0 => 64 / 8,
-            1 => 128 / 8,
-            2 => 192 / 8,
-            3 => 256 / 8,
+            0 => 64,
+            1 => 128,
+            2 => 192,
+            3 => 256,
             _ => panic!("invalid pte_width"),
         }
     }
     pub fn set_pte_width(&mut self, pte_width: u32) -> &mut Self {
         let val = match pte_width {
-            8 => 0,
-            16 => 1,
-            24 => 2,
-            32 => 3,
+            64 => 0,
+            128 => 1,
+            192 => 2,
+            256 => 3,
+            0 => 0,
+            1 => 1,
+            2 => 2,
+            3 => 3,
             _ => panic!("invalid pte_width"),
         };
         self.bits.set_bits(30..=31, val);
