@@ -13,7 +13,6 @@ pub mod mp;
 
 extern "C" {
     fn trap_vector_base();
-    fn tlb_refill_handler();
     fn rust_main(cpu_id: usize, dtb: usize);
     #[cfg(feature = "smp")]
     fn rust_main_secondary(cpu_id: usize);
@@ -21,9 +20,8 @@ extern "C" {
 
 unsafe extern "C" fn rust_entry(cpu_id: usize, dtb: usize) {
     crate::mem::clear_bss();
-    crate::cpu::init_primary(cpu_id);
+    crate::cpu::init_primary(cpu_id);    
     crate::arch::set_trap_vector_base(trap_vector_base as usize);
-    crate::arch::set_tlb_refill(tlb_refill_handler as usize);
     rust_main(cpu_id, 0);
 }
 

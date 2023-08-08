@@ -2,6 +2,7 @@ use axconfig::{PHYS_VIRT_OFFSET, TASK_STACK_SIZE};
 use loongarch64::register::csr::Register;
 use loongarch64::tlb::pwch::Pwch;
 use loongarch64::tlb::pwcl::Pwcl;
+
 #[link_section = ".bss.stack"]
 static mut BOOT_STACK: [u8; TASK_STACK_SIZE] = [0; TASK_STACK_SIZE];
 
@@ -9,6 +10,7 @@ static mut BOOT_STACK: [u8; TASK_STACK_SIZE] = [0; TASK_STACK_SIZE];
 static mut BOOT_PT: [u64; 512] = [0; 512];
 
 unsafe fn init_mmu() {
+    crate::arch::init_tlb();
     Pwcl::read()
         .set_ptbase(12) //页表起始位置
         .set_ptwidth(9) //页表宽度为9位
@@ -30,39 +32,6 @@ unsafe fn init_mmu() {
 #[no_mangle]
 #[link_section = ".text.boot"]
 unsafe extern "C" fn _start() -> ! {
-    // PC = 0x8020_0000
-    // a0 = hartid
-    // a1 = dtb
-    // core::arch::asm!("
-    // 0:
-    //     #设置映射窗口
-    //     li.d $t0,{phys_virt_offset}
-    //     addi.d $t0,$t0,0x11
-    //     csrwr $t0,0x180  #设置LOONGARCH_CSR_DMWIN0
-    //
-    //     la.global $t0,1f
-    //     jirl $zero, $t0,0
-    // 1:
-    //     la.global $t0, ebss
-    //     la.global $t1, sbss
-    //     bgeu $t0, $t1, 3f   #bge如果前者大于等于后者则跳转
-    // 2:
-    //     st.d $zero, $t0,0
-    //     addi.d $t0, $t0, 8
-    //     bltu $t0, $t1, 2b
-    // 3:
-    //     la.global $sp, {boot_stack}
-    //     li.d      $t0, {boot_stack_size}
-    //     add.d       $sp, $sp, $t0     # setup boot stack
-    //     bl {entry}
-    //     ",
-    //     phys_virt_offset = const PHYS_VIRT_OFFSET,
-    //     boot_stack_size = const TASK_STACK_SIZE,
-    //     boot_stack = sym BOOT_STACK,
-    //     entry = sym super::rust_entry,
-    //     options(noreturn),
-    // )
-    // core::arch::asm!("bl {entry}",entry = sym super::rust_entry,options(noreturn),)
     core::arch::asm!("
             # config direct window (inspired from linux source code)
             ori $t0, $zero, 0x1     # CSR_DMW1_PLV0
@@ -72,7 +41,7 @@ unsafe extern "C" fn _start() -> ! {
             ori $t0, $zero, 0x11    # CSR_DMW1_MAT | CSR_DMW1_PLV0
             lu52i.d $t0, $t0, -1792 # CA, PLV0, 0x9000 xxxx xxxx xxxx
             csrwr $t0,0x181         #LOONGARCH_CSR_DMWIN1
-            
+
             bl          {init_mmu}
 
             # Enable PG 
@@ -86,8 +55,8 @@ unsafe extern "C" fn _start() -> ! {
             la.global   $sp, {boot_stack}
             li.d        $t0, {boot_stack_size}
             add.d       $sp, $sp, $t0              // setup boot stack
-            
-            csrrd       $a0, 0x20
+
+            csrrd       $a0, 0x20       # LOONGARCH_CSR_CPUID
             bl {entry}
             ",
         boot_stack_size = const TASK_STACK_SIZE,

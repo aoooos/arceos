@@ -171,11 +171,11 @@ pub fn test_csr_register() {
     slli.d {d}, {d}, 12",d=inout(reg)dir1)
     };
     unsafe { asm!("lddir {}, {}, 1",out(reg)pt,in(reg)dir1) };
-    unsafe {
+    /* unsafe {
         asm!("
     bstrpick.d {d}, {d}, 63, 12
     slli.d {d}, {d}, 12",d=inout(reg)pt)
-    };
+    };*/
     info!("dir3 : {:#x}", dir3);
     info!("dir2 : {:#x}", dir2);
     info!("dir1 : {:#x}", dir1);
@@ -226,13 +226,7 @@ fn loongarch64_trap_handler(tf: &mut TrapFrame) {
     let eentry = Eentry::read();
     match estat.cause() {
         Trap::Exception(Exception::Breakpoint) => handle_breakpoint(&mut tf.era),
-        Trap::Exception(Exception::StorePageInvalid) => {
-            //let tlbelo0 = TLBELO::read(0);
-            //let tlbelo1 = TLBELO::read(1);
-            print_machine_info();
-            test_csr_register();
-            checkout_after_init();
-        }
+        Trap::Exception(Exception::StorePageInvalid)=>{test_csr_register()}
         Trap::Interrupt(_) => crate::trap::handle_irq_extern(estat.bits),
         _ => {
             panic!(
