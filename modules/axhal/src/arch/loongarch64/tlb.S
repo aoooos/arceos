@@ -75,10 +75,11 @@
 .global tlb_refill_handler
 tlb_refill_handler:
     csrwr $t0, 0x8B	// tlbrsave
+	csrrd $t0, 0x89	// TLBRBADV
     csrrd $t0, 0x1B	// pgd
-    lddir $t0, $t0, 4
-	bstrpick.d $t0, $t0, 63, 12
-	slli.d $t0, $t0, 12
+    // lddir $t0, $t0, 4
+	// bstrpick.d $t0, $t0, 63, 12
+	// slli.d $t0, $t0, 12
 	lddir $t0, $t0, 3 
 	bstrpick.d $t0, $t0, 63, 12
 	slli.d $t0, $t0, 12

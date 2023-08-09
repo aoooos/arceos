@@ -27,22 +27,45 @@ impl CPUCFG {
     }
 }
 
-// 获取支持的物理地址位数
-pub fn get_palen() -> usize {
-    let cfg = CPUCFG::read(1);
-    cfg.get_bits(4, 11) + 1
+// 获取处理器标识
+pub fn get_prid()->usize{
+    let cfg = CPUCFG::read(0);
+    cfg.get_bits(0, 31)
 }
 
-//获取支持的虚拟地址位数
-pub fn get_valen() -> usize {
+// 获取架构信息
+pub fn get_arch()->usize{
     let cfg = CPUCFG::read(1);
-    cfg.get_bits(12, 19) + 1
+    cfg.get_bits(0, 1)
 }
 
 pub fn get_mmu_support_page() -> bool {
     let cfg = CPUCFG::read(1);
     cfg.get_bit(2)
 }
+
+pub fn get_support_iocsr() -> bool {
+    let cfg = CPUCFG::read(1);
+    cfg.get_bit(3)
+}
+
+// 获取支持的物理地址位数
+pub fn get_palen() -> usize {
+    let cfg = CPUCFG::read(1);
+    cfg.get_bits(4, 11) + 1
+}
+
+// 获取支持的虚拟地址位数
+pub fn get_valen() -> usize {
+    let cfg = CPUCFG::read(1);
+    cfg.get_bits(12, 19) + 1
+}
+// 是否支持非对齐访存
+pub fn get_ual() -> bool {
+    let cfg = CPUCFG::read(1);
+    cfg.get_bit(20)
+}
+
 pub fn get_support_read_forbid() -> bool {
     let cfg = CPUCFG::read(1);
     cfg.get_bit(21)
@@ -54,6 +77,10 @@ pub fn get_support_execution_protection() -> bool {
 pub fn get_support_rplv() -> bool {
     let cfg = CPUCFG::read(1);
     cfg.get_bit(23)
+}
+pub fn get_support_huge_page() -> bool {
+    let cfg = CPUCFG::read(1);
+    cfg.get_bit(24)
 }
 pub fn get_support_rva() -> bool {
     let cfg = CPUCFG::read(3);

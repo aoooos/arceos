@@ -2,15 +2,15 @@ use axconfig::{PHYS_VIRT_OFFSET, TASK_STACK_SIZE};
 use loongarch64::register::csr::Register;
 use loongarch64::tlb::pwch::Pwch;
 use loongarch64::tlb::pwcl::Pwcl;
-
+use crate::arch::init_tlb;
 #[link_section = ".bss.stack"]
 static mut BOOT_STACK: [u8; TASK_STACK_SIZE] = [0; TASK_STACK_SIZE];
 
 #[link_section = ".data.boot_page_table"]
 static mut BOOT_PT: [u64; 512] = [0; 512];
 
+
 unsafe fn init_mmu() {
-    crate::arch::init_tlb();
     Pwcl::read()
         .set_ptbase(12) //页表起始位置
         .set_ptwidth(9) //页表宽度为9位
@@ -52,6 +52,8 @@ unsafe extern "C" fn _start() -> ! {
             li.w		$t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
             csrwr		$t0, 0x2        # LOONGARCH_CSR_EUEN
             
+            bl          {init_tlb}
+
             la.global   $sp, {boot_stack}
             li.d        $t0, {boot_stack_size}
             add.d       $sp, $sp, $t0              // setup boot stack
@@ -63,6 +65,7 @@ unsafe extern "C" fn _start() -> ! {
         boot_stack = sym BOOT_STACK,
         entry = sym super::rust_entry,
         init_mmu = sym init_mmu,
+        init_tlb = sym init_tlb,
         options(noreturn),
     )
 }

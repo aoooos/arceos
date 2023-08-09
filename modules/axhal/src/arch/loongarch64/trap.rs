@@ -146,42 +146,36 @@ pub fn test_csr_register() {
     info!("Pgd = {:#x}", pgd);
 
     let mut pgd: u32;
-    let mut dir3: u32;
-    let mut dir2: u32;
-    let mut dir1: u32;
-    let mut pt: u32;
+    let mut dir2base: u32;
+    let mut dir1base: u32;
+    let mut ptbase: u32;
 
     unsafe { asm!("csrrd {}, 0x1B",out(reg)pgd) };
-    unsafe { asm!("lddir {}, {}, 4",out(reg)dir3,in(reg)pgd) };
+    unsafe { asm!("lddir {}, {}, 3",out(reg)dir2base,in(reg)pgd) };
     unsafe {
         asm!("
     bstrpick.d {d}, {d}, 63, 12
-    slli.d {d}, {d}, 12",d=inout(reg)dir3)
+    slli.d {d}, {d}, 12",d=inout(reg)dir2base)
     };
-    unsafe { asm!("lddir {}, {}, 3",out(reg)dir2,in(reg)dir3) };
+    unsafe { asm!("lddir {}, {}, 2",out(reg)dir1base,in(reg)dir2base) };    
     unsafe {
         asm!("
     bstrpick.d {d}, {d}, 63, 12
-    slli.d {d}, {d}, 12",d=inout(reg)dir2)
+    slli.d {d}, {d}, 12",d=inout(reg)dir1base)
     };
-    unsafe { asm!("lddir {}, {}, 2",out(reg)dir1,in(reg)dir2) };
+    unsafe { asm!("lddir {}, {}, 1",out(reg)ptbase,in(reg)dir1base) };
     unsafe {
         asm!("
     bstrpick.d {d}, {d}, 63, 12
-    slli.d {d}, {d}, 12",d=inout(reg)dir1)
+    slli.d {d}, {d}, 12",d=inout(reg)ptbase)
     };
-    unsafe { asm!("lddir {}, {}, 1",out(reg)pt,in(reg)dir1) };
-    /* unsafe {
-        asm!("
-    bstrpick.d {d}, {d}, 63, 12
-    slli.d {d}, {d}, 12",d=inout(reg)pt)
-    };*/
-    info!("dir3 : {:#x}", dir3);
-    info!("dir2 : {:#x}", dir2);
-    info!("dir1 : {:#x}", dir1);
-    info!("pt : {:#x}", pt);
-    unsafe { asm!("ldpte {}, 0",in(reg)pt) };
-    unsafe { asm!("ldpte {}, 1",in(reg)pt) };
+    
+    info!("dir3base : {:#x}", pgd);
+    info!("dir2base : {:#x}", dir2base);
+    info!("dir1base : {:#x}", dir1base);
+    info!("ptbase : {:#x}", ptbase);
+    unsafe { asm!("ldpte {}, 0",in(reg)ptbase) };
+    unsafe { asm!("ldpte {}, 1",in(reg)ptbase) };
     let tlbrelo0 = TlbRelo::read(0);
     let tlbrelo1 = TlbRelo::read(1);
     info!("{:#x?}", tlbrelo0);
@@ -211,6 +205,7 @@ pub fn test_csr_register() {
     }
 }
 
+
 core::arch::global_asm!(
     include_str!("trap.S"),
     trapframe_size = const core::mem::size_of::<TrapFrame>(),
@@ -226,7 +221,7 @@ fn loongarch64_trap_handler(tf: &mut TrapFrame) {
     let eentry = Eentry::read();
     match estat.cause() {
         Trap::Exception(Exception::Breakpoint) => handle_breakpoint(&mut tf.era),
-        Trap::Exception(Exception::StorePageInvalid)=>{test_csr_register()}
+        // Trap::Exception(Exception::StorePageInvalid)|Trap::Exception(Exception::LoadPageInvalid)=>{test_csr_register()}
         Trap::Interrupt(_) => crate::trap::handle_irq_extern(estat.bits),
         _ => {
             panic!(
