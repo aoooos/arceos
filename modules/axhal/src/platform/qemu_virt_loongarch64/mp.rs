@@ -1,14 +1,13 @@
-use crate::mem::{virt_to_phys, PhysAddr, VirtAddr};
-//! TODO
+use loongarch64::ipi::{csr_mail_send, send_ipi_single};
+use crate::mem::{PhysAddr, phys_to_virt};
+
 /// Starts the given secondary CPU with its boot stack.
 pub fn start_secondary_cpu(hartid: usize, stack_top: PhysAddr) {
     extern "C" {
         fn _start_secondary();
     }
-    if sbi_rt::probe_extension(sbi_rt::Hsm).is_unavailable() {
-        warn!("HSM SBI extension is not supported for current SEE.");
-        return;
-    }
-    let entry = virt_to_phys(VirtAddr::from(_start_secondary as usize));
-    sbi_rt::hart_start(hartid, entry.as_usize(), stack_top.as_usize());
+    let stack_top_virt_addr = phys_to_virt(stack_top).as_usize();
+    unsafe { super::boot::SMP_BOOT_STACK_TOP = stack_top_virt_addr; }
+    csr_mail_send(_start_secondary as u64, hartid, 0);
+    send_ipi_single(hartid,1);
 }

@@ -6,7 +6,6 @@ use loongarch64::register::csr::Register;
 use loongarch64::register::eentry::Eentry;
 use loongarch64::register::estat::{self, Estat, Exception, Trap};
 use loongarch64::register::prcfg3::Prcfg3;
-use loongarch64::tlb::TLBELO;
 
 use loongarch64::cpu::{
     get_mmu_support_page, get_palen, get_support_execution_protection, get_support_lspw,

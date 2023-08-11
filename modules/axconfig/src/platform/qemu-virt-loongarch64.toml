@@ -4,16 +4,16 @@ arch = "loongarch64"
 platform = "qemu-virt-loongarch64"
 
 # Base address of the whole physical memory.
-phys-memory-base = "0x1be0_0000"
+phys-memory-base = "0x0"
 # Size of the whole physical memory.
 phys-memory-size = "0x800_0000"     # 128M
 # Base physical address of the kernel image.
-kernel-base-paddr = "0x1000"
+kernel-base-paddr = "0x000_1000"
 # Base virtual address of the kernel image.
-kernel-base-vaddr = "0x000_0000_0000_1000"
+kernel-base-vaddr = "0x9000_0000_0000_1000"
 # Linear mapping offset, for quick conversions between physical and virtual
 # addresses.
-phys-virt-offset = "0x00000_0000_0000_0000"
+phys-virt-offset =  "0x9000_0000_0000_0000"
 # MMIO regions with format (`base_paddr`, `size`).
 mmio-regions = [
     ["0xfec0_0000", "0x1000"],      # IO APIC
@@ -24,4 +24,4 @@ mmio-regions = [
 virtio-mmio-regions = []
 
 # Timer interrupt frequency in Hz.
-timer_frequency = "10_000_000"      # 10MHz
+timer_frequency = "100_000_000"      # 10MHz
