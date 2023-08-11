@@ -109,12 +109,27 @@ impl GenericPTE for Rv64PTE {
     }
 }
 
+/*
 impl fmt::Debug for Rv64PTE {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut f = f.debug_struct("Rv64PTE");
         f.field("raw", &self.0)
             .field("paddr", &self.paddr())
             .field("flags", &self.flags())
+            .finish()
+    }
+}
+*/
+
+impl fmt::Debug for Rv64PTE {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut f = f.debug_struct("Rv64PTE");
+        f.field("raw", &self.0)
+            .field("paddr", &self.paddr())
+            .field("flags", &self.flags())
+            .field("is_unused", &self.is_unused())
+            .field("is_present", &self.is_present())
+            .field("is_huge", &self.is_huge())
             .finish()
     }
 }

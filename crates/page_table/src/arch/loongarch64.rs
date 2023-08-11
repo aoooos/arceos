@@ -4,7 +4,7 @@ use crate::{PageTable64, PagingMetaData};
 
 use page_table_entry::loongarch64::LA64PTE;
 /// Metadata of LoongArch64 page tables.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct LA64MetaData;
 
 impl const PagingMetaData for LA64MetaData {

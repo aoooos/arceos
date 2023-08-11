@@ -2,7 +2,6 @@
 
 use crate::{GenericPTE, MappingFlags};
 use core::fmt;
-use log::info;
 use memory_addr::PhysAddr;
 
 bitflags::bitflags! {
@@ -25,7 +24,7 @@ bitflags::bitflags! {
         const GH = 1 << 6;
         /// Whether the physical page is exist.
         const P = 1 << 7;
-        /// Whether the page is not writable.
+        /// Whether the page is writable.
         const W = 1 << 8;
         /// Designates a global mapping when using huge page.
         const G = 1 << 12;
@@ -82,7 +81,7 @@ impl From<MappingFlags> for PTEFlags {
         if f.contains(MappingFlags::USER) {
             ret |= Self::PLVH | Self::PLVL;
         }
-        if f.contains(MappingFlags::DEVICE) {
+        if !f.contains(MappingFlags::DEVICE) {
             ret |= Self::MATL;
         }
         ret
@@ -94,25 +93,17 @@ impl From<MappingFlags> for PTEFlags {
 pub struct LA64PTE(u64);
 
 impl LA64PTE {
-    const PHYS_ADDR_MASK: u64 = (1 << 48) - (1 << 12); // bits 12..48
+    const PHYS_ADDR_MASK: u64 = 0x0000_ffff_ffff_f000; // bits 12..48
 }
 
 impl GenericPTE for LA64PTE {
     fn new_page(paddr: PhysAddr, flags: MappingFlags, _is_huge: bool) -> Self {
         let flags = PTEFlags::from(flags);
-        /* Self(
-            PTEFlags::V.bits() as u64
-                | !PTEFlags::NX.bits() as u64
-                | !PTEFlags::NR.bits() as u64
-                | PTEFlags::D.bits() as u64
-                | flags.bits() as u64
-                | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK),
-        )*/
-        info!("paddr={:#x?}", paddr);
-        info!("flags={:#x?}", flags);
+        // Self(PTEFlags::P.bits() as u64 |PTEFlags::W.bits() as u64|PTEFlags::V.bits() as u64 |!PTEFlags::NR.bits() as u64 | flags.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
         Self(flags.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
     }
     fn new_table(paddr: PhysAddr) -> Self {
+        // Self(PTEFlags::P.bits() as u64 |PTEFlags::W.bits() as u64|PTEFlags::V.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
         Self(PTEFlags::V.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
     }
     fn paddr(&self) -> PhysAddr {
@@ -126,6 +117,7 @@ impl GenericPTE for LA64PTE {
     }
     fn is_present(&self) -> bool {
         PTEFlags::from_bits_truncate(self.0 as usize).contains(PTEFlags::V)
+        //PTEFlags::from_bits_truncate(self.0 as usize).contains(PTEFlags::P)
     }
     fn is_huge(&self) -> bool {
         // TODO
@@ -142,6 +134,9 @@ impl fmt::Debug for LA64PTE {
         f.field("raw", &self.0)
             .field("paddr", &self.paddr())
             .field("flags", &self.flags())
+            .field("is_unused", &self.is_unused())
+            .field("is_present", &self.is_present())
+            .field("is_huge", &self.is_huge())
             .finish()
     }
 }

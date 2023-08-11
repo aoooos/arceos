@@ -1,8 +1,8 @@
 extern crate alloc;
 
 use alloc::{vec, vec::Vec};
+use core::fmt;
 use core::marker::PhantomData;
-
 use memory_addr::{PhysAddr, VirtAddr, PAGE_SIZE_4K};
 
 use crate::{GenericPTE, PagingIf, PagingMetaData};
@@ -34,6 +34,15 @@ pub struct PageTable64<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> {
     root_paddr: PhysAddr,
     intrm_tables: Vec<PhysAddr>,
     _phantom: PhantomData<(M, PTE, IF)>,
+}
+
+impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> fmt::Debug for PageTable64<M, PTE, IF> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut f = f.debug_struct("PageTable64");
+        f.field("root_paddr", &self.root_paddr)
+            .field("intrm_tables", &self.intrm_tables)
+            .finish()
+    }
 }
 
 impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> PageTable64<M, PTE, IF> {
@@ -75,6 +84,7 @@ impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> PageTable64<M, PTE, IF> {
             return Err(PagingError::AlreadyMapped);
         }
         *entry = GenericPTE::new_page(target.align_down(page_size), flags, page_size.is_huge());
+        // info!("entry={:#x?}",entry);
         Ok(())
     }
 
@@ -146,9 +156,9 @@ impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> PageTable64<M, PTE, IF> {
         let mut paddr = paddr;
         let mut size = size;
         while size > 0 {
-            info!("vaddr={:#x?}", vaddr);
-            info!("paddr={:#x?}", paddr);
-            info!("size={:#x?}", size);
+            // info!("vaddr={:#x?}", vaddr);
+            // info!("paddr={:#x?}", paddr);
+            // info!("size={:#x?}", size);
             let page_size = if allow_huge {
                 if vaddr.is_aligned(PageSize::Size1G)
                     && paddr.is_aligned(PageSize::Size1G)
@@ -251,13 +261,6 @@ impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> PageTable64<M, PTE, IF> {
     }
 
     fn next_table_mut<'a>(&self, entry: &PTE) -> PagingResult<&'a mut [PTE]> {
-        /*\\
-        #[cfg(target_arch = "loongarch64")]
-        if !entry.is_present() {
-        return Ok(self.table_of_mut(entry.paddr()));
-        }
-        */
-        //return Ok(self.table_of_mut(entry.paddr()));
         if !entry.is_present() {
             Err(PagingError::NotMapped)
         } else if entry.is_huge() {
