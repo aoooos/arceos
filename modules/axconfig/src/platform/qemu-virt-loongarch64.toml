@@ -16,9 +16,9 @@ kernel-base-vaddr = "0x000_0000_0000_1000"
 phys-virt-offset = "0x00000_0000_0000_0000"
 # MMIO regions with format (`base_paddr`, `size`).
 mmio-regions = [
-    #["0xfec0_0000", "0x1000"],      # IO APIC
-    #["0xfed0_0000", "0x1000"],      # HPET
-    #["0xfee0_0000", "0x1000"],      # Local APIC
+    ["0xfec0_0000", "0x1000"],      # IO APIC
+    ["0xfed0_0000", "0x1000"],      # HPET
+    ["0xfee0_0000", "0x1000"],      # Local APIC
 ]
 # VirtIO MMIO regions with format (`base_paddr`, `size`).
 virtio-mmio-regions = []

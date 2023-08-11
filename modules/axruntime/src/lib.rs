@@ -223,7 +223,7 @@ fn init_allocator() {
 
 #[cfg(feature = "paging")]
 fn remap_kernel_memory() -> Result<(), axhal::paging::PagingError> {
-    use axhal::mem::{memory_regions, phys_to_virt};
+    use axhal::mem::{memory_regions, phys_to_virt, PhysAddr};
     use axhal::paging::PageTable;
     use lazy_init::LazyInit;
 
@@ -245,6 +245,27 @@ fn remap_kernel_memory() -> Result<(), axhal::paging::PagingError> {
     }
 
     unsafe { axhal::arch::write_page_table_root(KERNEL_PAGE_TABLE.root_paddr()) };
+
+    /*debug!("debug:");
+    let memory_region: [usize; 5] = [
+        0x20000,
+        0x20000 + 0x4000,
+        0x20000 + 2 * 0x4000,
+        0x20000 + 3 * 0x4000,
+        0x20000 + 4 * 0x4000,
+    ];
+    let mut iter = memory_region.iter();
+    for r in iter {
+        info!("r={:#x?}", r);
+        info!("*r={:#x?}", *r);
+        let res = KERNEL_PAGE_TABLE.query(phys_to_virt(PhysAddr::from(*r)))?;
+        info!(
+            "{:#x?}\n{:#x?}\nquery_result:{:#x?}",
+            PhysAddr::from(*r),
+            phys_to_virt(PhysAddr::from(*r)),
+            res
+        );
+    }*/
     Ok(())
 }
 

@@ -157,7 +157,7 @@ pub fn test_csr_register() {
     bstrpick.d {d}, {d}, 63, 12
     slli.d {d}, {d}, 12",d=inout(reg)dir2base)
     };
-    unsafe { asm!("lddir {}, {}, 2",out(reg)dir1base,in(reg)dir2base) };    
+    unsafe { asm!("lddir {}, {}, 2",out(reg)dir1base,in(reg)dir2base) };
     unsafe {
         asm!("
     bstrpick.d {d}, {d}, 63, 12
@@ -169,7 +169,7 @@ pub fn test_csr_register() {
     bstrpick.d {d}, {d}, 63, 12
     slli.d {d}, {d}, 12",d=inout(reg)ptbase)
     };
-    
+
     info!("dir3base : {:#x}", pgd);
     info!("dir2base : {:#x}", dir2base);
     info!("dir1base : {:#x}", dir1base);
@@ -205,7 +205,6 @@ pub fn test_csr_register() {
     }
 }
 
-
 core::arch::global_asm!(
     include_str!("trap.S"),
     trapframe_size = const core::mem::size_of::<TrapFrame>(),
@@ -221,8 +220,7 @@ fn loongarch64_trap_handler(tf: &mut TrapFrame) {
     let eentry = Eentry::read();
     match estat.cause() {
         Trap::Exception(Exception::Breakpoint) => handle_breakpoint(&mut tf.era),
-        // Trap::Exception(Exception::StorePageInvalid)|Trap::Exception(Exception::LoadPageInvalid)=>{test_csr_register()}
-        Trap::Interrupt(_) => crate::trap::handle_irq_extern(estat.bits),
+        //Trap::Exception(Exception::StorePageInvalid) | Trap::Exception(Exception::LoadPageInvalid) => test_csr_register(), Trap::Interrupt(_) => crate::trap::handle_irq_extern(estat.bits),
         _ => {
             panic!(
                 "Unhandled trap {:?} @ {:#x}:\n{:#x?}",

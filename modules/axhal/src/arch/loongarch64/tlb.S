@@ -69,17 +69,11 @@
 .endm
 */
 
-
-.section .text.tlbrefill
-.balign 4096
-.global tlb_refill_handler
-tlb_refill_handler:
-    csrwr $t0, 0x8B	// tlbrsave
-	csrrd $t0, 0x89	// TLBRBADV
+.macro LOAD_PTE
     csrrd $t0, 0x1B	// pgd
-    // lddir $t0, $t0, 4
-	// bstrpick.d $t0, $t0, 63, 12
-	// slli.d $t0, $t0, 12
+    //lddir $t0, $t0, 4
+	//bstrpick.d $t0, $t0, 63, 12
+	//slli.d $t0, $t0, 12
 	lddir $t0, $t0, 3 
 	bstrpick.d $t0, $t0, 63, 12
 	slli.d $t0, $t0, 12
@@ -90,9 +84,22 @@ tlb_refill_handler:
 	bstrpick.d $t0, $t0, 63, 12
 	slli.d $t0, $t0, 12
     ldpte $t0, 0	#取回偶数号页表项
-		//csrrd $t0, 0x8c	// tlbrelo0, used to debug
+		csrrd $t1, 0x8c	// tlbrelo0, used to debug
     ldpte $t0, 1 	#取回奇数号页表项
-		//csrrd $t0, 0x8d // tlbrelo1, used to debug
+		csrrd $t1, 0x8d // tlbrelo1, used to debug
+.endm
+
+.section .text.tlbrefill
+.balign 4096
+.global tlb_refill_handler
+tlb_refill_handler:
+    csrwr $t0, 0x8B	// tlbrsave
+	csrwr $t1, 0x30	// save
+
+	LOAD_PTE
+	
     tlbfill
     csrrd $t0, 0x8B	// tlbrsave
+	csrrd $t1, 0x30	// save
+
     ertn

@@ -118,7 +118,6 @@ LAdebug: build
 	  -ex 'b rust_entry'\
 	  -ex 'b loongarch64_trap_handler'\
 	  -ex 'b *0x3000'\
-	  -ex 'b *0x3684'\	  
 	  -ex 'disp /16i $$pc'
 
 clippy:

@@ -1,8 +1,8 @@
 extern crate alloc;
 
 use alloc::{vec, vec::Vec};
-use core::marker::PhantomData;
 use core::fmt;
+use core::marker::PhantomData;
 use memory_addr::{PhysAddr, VirtAddr, PAGE_SIZE_4K};
 
 use crate::{GenericPTE, PagingIf, PagingMetaData};
@@ -244,7 +244,6 @@ impl<M: PagingMetaData, PTE: GenericPTE, IF: PagingIf> PageTable64<M, PTE, IF> {
         if let Some(paddr) = IF::alloc_frame() {
             let ptr = IF::phys_to_virt(paddr).as_mut_ptr();
             unsafe { core::ptr::write_bytes(ptr, 0, PAGE_SIZE_4K) };
-            info!("ptr={:#x?}",ptr);
             Ok(paddr)
         } else {
             Err(PagingError::NoMemory)

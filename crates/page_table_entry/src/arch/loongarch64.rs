@@ -101,7 +101,6 @@ impl GenericPTE for LA64PTE {
         let flags = PTEFlags::from(flags);
         // Self(PTEFlags::P.bits() as u64 |PTEFlags::W.bits() as u64|PTEFlags::V.bits() as u64 |!PTEFlags::NR.bits() as u64 | flags.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
         Self(flags.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
-
     }
     fn new_table(paddr: PhysAddr) -> Self {
         // Self(PTEFlags::P.bits() as u64 |PTEFlags::W.bits() as u64|PTEFlags::V.bits() as u64 | ((paddr.as_usize()) as u64 & Self::PHYS_ADDR_MASK))
