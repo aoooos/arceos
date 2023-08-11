@@ -5,3 +5,5 @@
 *.img
 actual.out
 qemu.log
+efi-virtio.rom
+.idea

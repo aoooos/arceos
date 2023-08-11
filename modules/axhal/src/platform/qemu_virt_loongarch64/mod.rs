@@ -1,4 +1,3 @@
-//mod apic;
 mod boot;
 pub mod console;
 pub mod mem;
@@ -19,11 +18,10 @@ extern "C" {
     fn rust_main_secondary(cpu_id: usize);
 }
 
-unsafe extern "C" fn rust_entry(cpu_id: usize, dtb: usize) {
+unsafe extern "C" fn rust_entry(cpu_id: usize, _dtb: usize) {
     crate::mem::clear_bss();
     crate::cpu::init_primary(cpu_id);
     crate::arch::set_trap_vector_base(trap_vector_base as usize);
-    crate::arch::set_tlb_refill(tlb_refill_handler as usize);
     rust_main(cpu_id, 0);
 }
 
@@ -37,16 +35,14 @@ unsafe extern "C" fn rust_entry_secondary(cpu_id: usize) {
 /// Initializes the platform devices for the primary CPU.
 ///
 /// For example, the interrupt controller and the timer.
-
 pub fn platform_init() {
-    #[cfg(feature = "irq")]
-    self::apic::init_primary();
-    self::time::init_primary();
+    // #[cfg(feature = "irq")]
+    // self::apic::init_primary();
+    // self::time::init_primary();
 }
 
 /// Initializes the platform devices for secondary CPUs.
 #[cfg(feature = "smp")]
 pub fn platform_init_secondary() {
-    self::apic::init_secondary();
-    self::time::init_secondary();
+
 }

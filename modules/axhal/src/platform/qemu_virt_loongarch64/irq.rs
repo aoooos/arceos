@@ -77,9 +77,4 @@ pub fn dispatch_irq(scause: usize) {
 
 pub(super) fn init_percpu() {
     // enable soft interrupts, timer interrupts, and external interrupts
-    unsafe {
-        sie::set_ssoft();
-        sie::set_stimer();
-        sie::set_sext();
-    }
 }

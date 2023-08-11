@@ -6,7 +6,6 @@ mod trap;
 
 use bit_field::BitField;
 use core::arch::asm;
-use loongarch64::asm;
 use loongarch64::register::{crmd::Crmd, csr::Register, eentry::Eentry};
 use loongarch64::tlb::{Pgd, Pgdh, Pgdl, StlbPs, TLBREntry, TlbREhi};
 use memory_addr::{PhysAddr, VirtAddr};
@@ -16,13 +15,13 @@ pub use self::context::{TaskContext, TrapFrame};
 /// Allows the current CPU to respond to interrupts.
 #[inline]
 pub fn enable_irqs() {
-    unsafe { Crmd::read().set_ie(true).write() }
+    Crmd::read().set_ie(true).write()
 }
 
 /// Makes the current CPU to ignore interrupts.
 #[inline]
 pub fn disable_irqs() {
-    unsafe { Crmd::read().set_ie(false).write() }
+    Crmd::read().set_ie(false).write()
 }
 
 /// Returns whether the current CPU is allowed to respond to interrupts.
@@ -73,7 +72,7 @@ pub unsafe fn write_page_table_root(root_paddr: PhysAddr) {
 /// If `vaddr` is [`None`], flushes the entire TLB. Otherwise, flushes the TLB
 /// entry that maps the given virtual address.
 #[inline]
-pub fn flush_tlb(vaddr: Option<VirtAddr>) {
+pub fn flush_tlb(_vaddr: Option<VirtAddr>) {
     unsafe {
         /*
         if let Some(vaddr) = vaddr {
