@@ -175,6 +175,7 @@ pub extern "C" fn rust_main(cpu_id: usize, dtb: usize) -> ! {
     {
         info!("Initialize interrupt handlers...");
         init_interrupt();
+        info!("Initialize interrupt handlers finished");
     }
 
     info!("Primary CPU {} init OK.", cpu_id);
@@ -246,31 +247,12 @@ fn remap_kernel_memory() -> Result<(), axhal::paging::PagingError> {
 
     unsafe { axhal::arch::write_page_table_root(KERNEL_PAGE_TABLE.root_paddr()) };
 
-    /*debug!("debug:");
-    let memory_region: [usize; 5] = [
-        0x20000,
-        0x20000 + 0x4000,
-        0x20000 + 2 * 0x4000,
-        0x20000 + 3 * 0x4000,
-        0x20000 + 4 * 0x4000,
-    ];
-    let mut iter = memory_region.iter();
-    for r in iter {
-        info!("r={:#x?}", r);
-        info!("*r={:#x?}", *r);
-        let res = KERNEL_PAGE_TABLE.query(phys_to_virt(PhysAddr::from(*r)))?;
-        info!(
-            "{:#x?}\n{:#x?}\nquery_result:{:#x?}",
-            PhysAddr::from(*r),
-            phys_to_virt(PhysAddr::from(*r)),
-            res
-        );
-    }*/
     Ok(())
 }
 
 #[cfg(feature = "irq")]
 fn init_interrupt() {
+    info!("init_interrupt");
     use axhal::time::TIMER_IRQ_NUM;
 
     // Setup timer interrupt handler
@@ -281,6 +263,7 @@ fn init_interrupt() {
     static NEXT_DEADLINE: u64 = 0;
 
     fn update_timer() {
+        info!("update_timer");
         let now_ns = axhal::time::current_time_nanos();
         // Safety: we have disabled preemption in IRQ handler.
         let mut deadline = unsafe { NEXT_DEADLINE.read_current_raw() };
@@ -290,7 +273,6 @@ fn init_interrupt() {
         unsafe { NEXT_DEADLINE.write_current_raw(deadline + PERIODIC_INTERVAL_NANOS) };
         axhal::time::set_oneshot_timer(deadline);
     }
-
     axhal::irq::register_handler(TIMER_IRQ_NUM, || {
         update_timer();
         #[cfg(feature = "multitask")]

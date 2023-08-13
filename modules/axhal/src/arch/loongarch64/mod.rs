@@ -4,15 +4,15 @@
 mod context;
 mod trap;
 
-use log::info;
 use bit_field::BitField;
 use core::arch::asm;
+use log::info;
 use loongarch64::register::{crmd::Crmd, csr::Register, eentry::Eentry};
 
-use loongarch64::tlb::{Pgd, Pgdh, Pgdl, StlbPs, TLBREntry, TlbREhi};
-use loongarch64::register::time::get_timer_freq;
-use memory_addr::{PhysAddr, VirtAddr};
 use axconfig::TICKS_PER_SEC;
+use loongarch64::register::time::get_timer_freq;
+use loongarch64::tlb::{Pgd, Pgdh, Pgdl, StlbPs, TLBREntry, TlbREhi};
+use memory_addr::{PhysAddr, VirtAddr};
 
 pub use self::context::{TaskContext, TrapFrame};
 
@@ -67,7 +67,7 @@ pub unsafe fn write_page_table_root(root_paddr: PhysAddr) {
     trace!("set page table root: {:#x} => {:#x}", old_root, root_paddr);
     if old_root != root_paddr {
         Pgdl::read().set_val(root_paddr.into()).write(); //设置新的页基址
-        // Pgdh::read().set_val(root_paddr.into()).write(); //设置新的页基址
+                                                         // Pgdh::read().set_val(root_paddr.into()).write(); //设置新的页基址
     }
 }
 
@@ -91,25 +91,12 @@ pub fn flush_tlb(_vaddr: Option<VirtAddr>) {
 /// Writes Exception Entry Base Address Register (`eentry`).
 #[inline]
 pub fn set_trap_vector_base(eentry: usize) {
-    // Ticlr::read().clear_timer().write(); //清除时钟中断
-    // Tcfg::read().set_enable(false).write();
-    // Ecfg::read().set_lie_with_index(11, false).write(); //定时器中断被处理器核采样记录在CSR.ESTAT.IS[11]位
     Crmd::read().set_ie(false).write(); //关闭全局中断
-
-    // let timer_freq = get_timer_freq();
-    // Tcfg::read().set_enable(true).set_loop(true).set_initval(timer_freq / TICKS_PER_SEC).write(); //设置计时器的配置
     Eentry::read().set_eentry(eentry).write(); //设置例外入口
-
-    // let timer_freq = get_timer_freq();
-    // Ticlr::read().clear_timer().write(); //清除时钟中断
-    // Tcfg::read().set_enable(true).set_loop(true).set_initval(timer_freq / TICKS_PER_SEC).write(); //设置计时器的配置
-    // Ecfg::read().set_lie_with_index(11, true).set_lie_with_index(2,true).write();
-
     Crmd::read().set_ie(true).write(); //开启全局中断
 }
 
-core::arch::global_asm!(
-    include_str!("tlb.S"));
+core::arch::global_asm!(include_str!("tlb.S"));
 
 extern "C" {
     fn tlb_refill_handler();

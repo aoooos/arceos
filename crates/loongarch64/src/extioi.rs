@@ -1,17 +1,27 @@
-use crate::loongarch64::{iocsr_read_b, iocsr_read_d, iocsr_read_w, iocsr_write_b, iocsr_write_d, iocsr_write_h, iocsr_write_w, KEYBOARD_IRQ, LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE, LOONGARCH_IOCSR_EXTIOI_EN_BASE, LOONGARCH_IOCSR_EXTIOI_ISR_BASE, LOONGARCH_IOCSR_EXTIOI_MAP_BASE, LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE, MOUSE_IRQ, UART0_IRQ};
+use super::loongson::{
+    iocsr_read_b, iocsr_read_d, iocsr_read_w, iocsr_write_b, iocsr_write_d, iocsr_write_h,
+    iocsr_write_w, LOONGARCH_IOCSR_EXRIOI_NODETYPE_BASE, LOONGARCH_IOCSR_EXTIOI_EN_BASE,
+    LOONGARCH_IOCSR_EXTIOI_ISR_BASE, LOONGARCH_IOCSR_EXTIOI_MAP_BASE,
+    LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE,
+};
+use super::ls7a::{KEYBOARD_IRQ, MOUSE_IRQ, UART0_IRQ};
+use super::register::csr::Register;
+use super::register::estat::Estat;
 use bit_field::BitField;
-use log::info;
-
+use log::{debug, info};
 /// 初始化外部中断
 pub fn extioi_init() {
-    let mut enable = 0;
+    let estat = Estat::read();
+    debug!("before_extioi_init_estat={:#x?}", estat.get_val());
+    /* let mut enable = 0;
     enable
         .set_bit(KEYBOARD_IRQ, true)
         .set_bit(MOUSE_IRQ, true)
         .set_bit(UART0_IRQ, true);
-    info!("extioi_init: enable = {:#b}", enable);
+    info!("extioi_init: enable = {:#b}", enable);*/
     // 使能外部设备中断
-    iocsr_write_d(LOONGARCH_IOCSR_EXTIOI_EN_BASE, enable);
+    // iocsr_write_d(LOONGARCH_IOCSR_EXTIOI_EN_BASE, enable);
+
     // extioi[31:0] map to cpu irq pin INT1, other to INT0
     //路由到INT1上
     iocsr_write_b(LOONGARCH_IOCSR_EXTIOI_MAP_BASE, 0x1);
@@ -24,10 +34,13 @@ pub fn extioi_init() {
 
     //检查扩展i/o触发器是不是全0，即没有被触发的中断
     let extioi_isr = iocsr_read_b(LOONGARCH_IOCSR_EXTIOI_ISR_BASE);
-    info!("extioi_init: extioi_isr = {:#b}", extioi_isr);
+    debug!("extioi_init: extioi_isr = {:#b}", extioi_isr);
     let current_trigger = extioi_claim();
-    info!("extioi_init: current_trigger = {:#b}", current_trigger);
+    debug!("extioi_init: current_trigger = {:#b}", current_trigger);
     assert_eq!(extioi_isr, 0);
+    let estat = Estat::read();
+    debug!("after_extioi_init_estat={:#x?}", estat.get_val());
+    debug!("extioi_init: current_trigger = {:#b}", current_trigger);
 }
 
 // ask the extioi what interrupt we should serve.

@@ -49,6 +49,10 @@ pub fn set_enable(vector: usize, enabled: bool) {
 /// the registration failed.
 #[cfg(feature = "irq")]
 pub fn register_handler(vector: usize, handler: crate::irq::IrqHandler) -> bool {
+    info!(
+        "register_handler, vector:{:#x?}, handler:{:#x?}",
+        vector, handler
+    );
     crate::irq::register_handler_common(vector, handler)
 }
 
@@ -59,6 +63,7 @@ pub fn register_handler(vector: usize, handler: crate::irq::IrqHandler) -> bool 
 /// necessary, it also acknowledges the interrupt controller after handling.
 #[cfg(feature = "irq")]
 pub fn dispatch_irq(vector: usize) {
+    info!("dispatch_irq, vector:{:#x?}", vector);
     crate::irq::dispatch_irq_common(vector);
     unsafe { local_apic().end_of_interrupt() };
 }

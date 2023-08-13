@@ -13,7 +13,7 @@ FS ?= n
 NET ?= n
 GRAPHIC ?= n
 
-QEMU_LOG ?= n
+QEMU_LOG ?= y
 
 ifeq ($(wildcard $(APP)),)
   $(error Application path "$(APP)" is not valid)

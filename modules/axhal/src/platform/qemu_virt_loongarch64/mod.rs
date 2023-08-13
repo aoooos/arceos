@@ -19,7 +19,7 @@ extern "C" {
 
 unsafe extern "C" fn rust_entry(cpu_id: usize, _dtb: usize) {
     crate::mem::clear_bss();
-    crate::cpu::init_primary(cpu_id);    
+    crate::cpu::init_primary(cpu_id);
     crate::arch::set_trap_vector_base(trap_vector_base as usize);
     rust_main(cpu_id, 0);
 }
@@ -33,15 +33,13 @@ unsafe extern "C" fn rust_entry_secondary(cpu_id: usize) {
 
 /// Initializes the platform devices for the primary CPU.
 ///
-/// For example, the interrupt controller and the timer.
+/// For example, the interrupt controller and external interrupts.
 pub fn platform_init() {
-    // #[cfg(feature = "irq")]
-    // self::apic::init_primary();
-    // self::time::init_primary();
+    #[cfg(feature = "irq")]
+    self::irq::init_primary();
+    self::time::init_primary();
 }
 
 /// Initializes the platform devices for secondary CPUs.
 #[cfg(feature = "smp")]
-pub fn platform_init_secondary() {
-
-}
+pub fn platform_init_secondary() {}

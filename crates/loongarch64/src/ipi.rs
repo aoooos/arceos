@@ -1,6 +1,6 @@
-use core::arch::asm;
-use bit_field::BitField;
 use crate::consts::*;
+use bit_field::BitField;
+use core::arch::asm;
 pub fn iocsr_write_u32(addr: usize, value: u32) {
     unsafe {
         asm!("iocsrwr.w {},{}", in(reg) value,in(reg) addr);
@@ -49,8 +49,6 @@ pub fn csr_mail_send(entry: u64, cpu: usize, mailbox: usize) {
     val |= entry << IOCSR_MBUF_SEND_BUF_SHIFT;
     iocsr_write_u64(LOONGARCH_IOCSR_MBUF_SEND, val);
 }
-
-
 
 /// IPI_Send 0x1040 WO 32 位中断分发寄存器
 /// `[31]` 等待完成标志，置 1 时会等待中断生效
