@@ -273,12 +273,14 @@ fn init_interrupt() {
         unsafe { NEXT_DEADLINE.write_current_raw(deadline + PERIODIC_INTERVAL_NANOS) };
         axhal::time::set_oneshot_timer(deadline);
     }
+    //debug!("init_interrupt -> register_handler");
     axhal::irq::register_handler(TIMER_IRQ_NUM, || {
         update_timer();
         #[cfg(feature = "multitask")]
         axtask::on_timer_tick();
     });
 
+    //info!("init_interrupt -> enable_irqs");
     // Enable IRQs before starting app
     axhal::arch::enable_irqs();
 }

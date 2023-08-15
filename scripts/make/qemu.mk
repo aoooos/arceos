@@ -16,7 +16,7 @@ qemu_args-aarch64 := \
   -machine virt \
   -kernel $(OUT_BIN)
 
-LOONGARCH_BIOS = modules/axhal/src/platform/qemu_virt_loongarch64/loongarch_bios_0310_debug.bin
+LOONGARCH_BIOS = modules/axhal/src/platform/qemu_virt_loongarch64/loongarch_bios_0310.bin
 qemu_args-loongarch64 := \
   -bios $(LOONGARCH_BIOS) \
   -kernel $(OUT_ELF)\

@@ -1,4 +1,9 @@
+use loongarch64::register::crmd::Crmd;
+use loongarch64::register::csr::Register;
+use loongarch64::register::ecfg::Ecfg;
+use loongarch64::register::ticlr::Ticlr;
 use loongarch64::register::time::Time;
+
 const NANOS_PER_TICK: u64 = crate::time::NANOS_PER_SEC / axconfig::TIMER_FREQUENCY as u64;
 
 /// Returns the current clock time in hardware ticks.
@@ -27,29 +32,32 @@ pub fn set_oneshot_timer(deadline_ns: u64) {
     use loongarch64::register::csr::Register;
     use loongarch64::register::tcfg::Tcfg;
     use loongarch64::register::ticlr::Ticlr;
-    Ticlr::read().clear_timer().write(); //清除时钟中断
 
-    info!("set_oneshot_timer");
+    // debug!("set_oneshot_timer");
+    Ticlr::read().clear_timer().write(); //清除时钟中断
     Tcfg::read()
         .set_enable(true)
-        .set_loop(true)
+        .set_loop(false)
         .set_initval(nanos_to_ticks(deadline_ns) as usize)
-        .write(); //设置计时器的配置
+        .write();
 }
 
 pub(super) fn init_primary() {
     #[cfg(feature = "irq")]
     {
-        info!("time::init_primary");
-        use loongarch64::register::csr::Register;
-        use loongarch64::register::tcfg::Tcfg;
-        use loongarch64::register::ticlr::Ticlr;
+        use crate::arch::disable_irqs;
+        disable_irqs();
+
         Ticlr::read().clear_timer().write(); //清除时钟中断
-        Tcfg::read()
-            .set_enable(true)
-            .set_loop(true)
-            .set_initval(10000000 as usize)
-            .write();
+
+        /*
+               Tcfg::read()
+                   .set_enable(true)
+                   .set_loop(false)
+                   .set_initval(0 as usize)
+                   .write();
+
+        */
         //super::irq::set_enable(super::irq::TIMER_IRQ_NUM, true);
     }
 }

@@ -18,15 +18,11 @@ fn handle_breakpoint(era: &mut usize) {
 #[no_mangle]
 fn loongarch64_trap_handler(tf: &mut TrapFrame) {
     let estat = Estat::read();
-    //info!("loongarch64_trap_handler, estat={:#x}", estat.get_val());
-    //info!("loongarch64_trap_handler");
-    //info!("estat.cause={:#x?}", estat.cause());
-
     match estat.cause() {
         Trap::Exception(Exception::Breakpoint) => handle_breakpoint(&mut tf.era),
         // Trap::Interrupt(Interrupt::Timer) => crate::trap::handle_irq_extern(11),
         Trap::Interrupt(_) => {
-            let irq_num: usize = estat.bits.trailing_zeros() as usize;
+            let irq_num: usize = tf.estat.trailing_zeros() as usize;
             crate::trap::handle_irq_extern(irq_num)
         }
         _ => {

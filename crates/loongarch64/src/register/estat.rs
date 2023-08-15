@@ -68,11 +68,13 @@ impl Estat {
         let ecode = self.get_ecode();
         if ecode == 0 {
             // 仅当 CSR.ECFG.VS=0 时，表示是中断
-            let ecfg_vs = Ecfg::read().get_vs();
+            let ecfg = Ecfg::read();
+            let ecfg_vs = ecfg.get_vs();
             if ecfg_vs == 0 {
                 // 读取中断位
                 for index in (0..13).rev() {
-                    if self.get_is_with_index(index) {
+                    if self.get_is_with_index(index) && ecfg.get_lie_with_index(index) {
+                        //log::debug!("index={:#x?}", index);
                         return Trap::Interrupt(Interrupt::from_usize(index));
                     }
                 }

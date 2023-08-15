@@ -16,7 +16,6 @@ fn handle_breakpoint(sepc: &mut usize) {
 
 #[no_mangle]
 fn riscv_trap_handler(tf: &mut TrapFrame, _from_user: bool) {
-    info!("riscv_trap_handler");
     let scause = scause::read();
     match scause.cause() {
         Trap::Exception(E::Breakpoint) => handle_breakpoint(&mut tf.sepc),

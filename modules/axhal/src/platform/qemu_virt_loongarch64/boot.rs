@@ -1,10 +1,30 @@
-use axconfig::{TASK_STACK_SIZE};
+use axconfig::TASK_STACK_SIZE;
 
 #[link_section = ".bss.stack"]
 static mut BOOT_STACK: [u8; TASK_STACK_SIZE] = [0; TASK_STACK_SIZE];
 
 pub static mut SMP_BOOT_STACK_TOP: usize = 0;
 
+unsafe fn init_mmu() {
+    use loongarch64::register::csr::Register;
+    use loongarch64::tlb::Pwch;
+    use loongarch64::tlb::Pwcl;
+
+    Pwcl::read()
+        .set_ptbase(12) //页表起始位置
+        .set_ptwidth(9) //页表宽度为9位
+        .set_dir1_base(21) //第一级页目录表起始位置
+        .set_dir1_width(9) //第一级页目录表宽度为9位
+        .set_dir2_base(30) //第二级页目录表起始位置
+        .set_dir2_width(9) //第二级页目录表宽度为9位
+        .write();
+    Pwch::read()
+        .set_dir3_base(39) //第三级页目录表
+        .set_dir3_width(8) //第三级页目录表宽度为9位
+        //.set_dir4_base(48) //第四级页目录表
+        .set_dir4_width(0) //第四级页目录表
+        .write();
+}
 
 /// The earliest entry point for the primary CPU.
 ///
@@ -21,6 +41,18 @@ unsafe extern "C" fn _start() -> ! {
             lu52i.d     $t0, $t0, -1792     # CA, PLV0, 0x9000 xxxx xxxx xxxx
             csrwr       $t0, 0x181          # LOONGARCH_CSR_DMWIN1
 
+            bl {init_mmu}
+
+            # Enable PG 
+            li.w		$t0, 0xb0		# PLV=0, IE=0, PG=1
+            csrwr		$t0, 0x0        # LOONGARCH_CSR_CRMD
+            li.w		$t0, 0x04		# PLV=0, PIE=1, PWE=0
+            csrwr		$t0, 0x1        # LOONGARCH_CSR_PRMD
+            li.w		$t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
+            csrwr		$t0, 0x2        # LOONGARCH_CSR_EUEN
+            
+            bl {init_tlb}
+
             la.global   $sp, {boot_stack}
             li.d        $t0, {boot_stack_size}
             add.d       $sp, $sp, $t0       # setup boot stack
@@ -30,6 +62,8 @@ unsafe extern "C" fn _start() -> ! {
             ",
         boot_stack_size = const TASK_STACK_SIZE,
         boot_stack = sym BOOT_STACK,
+        init_mmu = sym init_mmu,
+        init_tlb = sym crate::arch::init_tlb,
         entry = sym super::rust_entry,
         options(noreturn),
     )
