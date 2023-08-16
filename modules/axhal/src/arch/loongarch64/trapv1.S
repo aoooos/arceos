@@ -87,10 +87,9 @@
 	ld.d	$a0, $sp, 8*33  // prmd
 	andi    $a0, $a0, 0x3   // extract pplv bit (previous privilege level)
 	beqz    $a0, 8f
-	ld.d    $r21, $sp, 8*21 // reserved reg
+	//ld.d    $r21, $sp, 8*21 // reserved reg
 8:
 	ld.d	$a0, $sp, 8*37  // era
-    addi.d 	$a0, $a0, 0x4   // era + 4
 	csrwr	$a0, 0x6
 	ld.d	$a0, $sp, 8*33  // prmd
 	csrwr	$a0, 0x1
@@ -105,27 +104,32 @@
 
 .macro SAVE_REGS
 	addi.d		$sp, $sp, -{trapframe_size} // allocate space
-	st.d		$sp, $sp, 8*3   // sp
-    st.d		$ra, $sp, 8*1   // ra
+	st.d		$t2, $sp, 8*3   // sp
+	st.d		$zero, $sp, 8*0 // zero
+
+    SAVE_CSR_REGS
+	SAVE_TEMP_REGS
+
+	st.d		$ra, $sp, 8*1   // ra
 
     SAVE_ARGUMENT_REGS
-    SAVE_TEMP_REGS
-    SAVE_STATIC_REGS
-    SAVE_CSR_REGS
-	
+
 	csrrd		$ra, 0x6
 	st.d		$ra, $sp, 8*37  // era
 
 	st.d		$tp, $sp, 8*2   // thread pointer
-	st.d		$r21, $sp, 8*21 // reserved reg
+	//st.d		$r21, $sp, 8*21 // reserved reg
 	st.d		$fp, $sp, 8*22  // frame pointer
 
+    SAVE_STATIC_REGS
+
+	move	$r21, $sp
 	move	$a0, $sp
 .endm
 
 
 .macro LOAD_REGS
-	ld.d	$sp, $sp, 8*3
+	move	$sp, $r21
     LOAD_STATIC_REGS
 
     LOAD_TEMP_REGS
@@ -134,7 +138,9 @@
 
 	//ld.d	$sp, $sp, 8*3   // sp
 	addi.d		$sp, $sp, {trapframe_size}
-
+	csrrd		$r21, 0x6
+	addi.d 		$r21, $r21, 0x4
+	csrwr		$r21, 0x6
 .endm
 
 

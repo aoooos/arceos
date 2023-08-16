@@ -14,7 +14,7 @@ static IRQ_HANDLER_TABLE: HandlerTable<MAX_IRQ_COUNT> = HandlerTable::new();
 /// Platform-independent IRQ dispatching.
 #[allow(dead_code)]
 pub(crate) fn dispatch_irq_common(irq_num: usize) {
-    //trace!("IRQ {}", irq_num);
+    debug!("axhal -> irq.rs -> dispatch_irq_common, IRQ {}", irq_num);
     if !IRQ_HANDLER_TABLE.handle(irq_num) {
         warn!("Unhandled IRQ {}", irq_num);
     }
@@ -26,12 +26,11 @@ pub(crate) fn dispatch_irq_common(irq_num: usize) {
 /// the registration failed.
 #[allow(dead_code)]
 pub(crate) fn register_handler_common(irq_num: usize, handler: IrqHandler) -> bool {
-    /*
     debug!(
-        "register_handler_common,irq_num={},handler={:#x?}",
+        "axhal -> irq.rs -> register_handler_common,irq_num={}, handler={:#x?}",
         irq_num, handler
     );
-    */
+
     if irq_num < MAX_IRQ_COUNT && IRQ_HANDLER_TABLE.register_handler(irq_num, handler) {
         set_enable(irq_num, true);
         return true;

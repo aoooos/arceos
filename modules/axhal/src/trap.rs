@@ -19,5 +19,6 @@ pub trait TrapHandler {
 /// Call the external IRQ handler.
 #[allow(dead_code)]
 pub(crate) fn handle_irq_extern(irq_num: usize) {
+    debug!("axhal -> trap.rs -> handle_irq_extern, irq_num={}", irq_num);
     call_interface!(TrapHandler::handle_irq, irq_num);
 }

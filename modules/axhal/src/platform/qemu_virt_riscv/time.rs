@@ -25,11 +25,14 @@ pub const fn nanos_to_ticks(nanos: u64) -> u64 {
 /// A timer interrupt will be triggered at the given deadline (in nanoseconds).
 #[cfg(feature = "irq")]
 pub fn set_oneshot_timer(deadline_ns: u64) {
-    info!("set_oneshot_timer");
+    debug!("time.rs -> set_oneshot_timer");
     sbi_rt::set_timer(nanos_to_ticks(deadline_ns));
 }
 
 pub(super) fn init_percpu() {
     #[cfg(feature = "irq")]
-    sbi_rt::set_timer(0);
+    {
+        debug!("time.rs -> init_primary");
+        sbi_rt::set_timer(0);
+    }
 }

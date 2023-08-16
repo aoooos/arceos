@@ -36,10 +36,14 @@ macro_rules! with_cause {
 }
 /// Enables or disables the given IRQ.
 pub fn set_enable(vector: usize, _enabled: bool) {
-    // debug!("irqs.rs -> set_enable");
+    debug!("irqs.rs -> set_enable");
     if vector == 11 {
         if _enabled {
-            Tcfg::read().set_enable(true).set_loop(true).write();
+            Tcfg::read()
+                .set_enable(true)
+                .set_initval(800000000 as usize)
+                .set_loop(false)
+                .write();
         }
     }
 }
@@ -51,12 +55,11 @@ pub fn set_enable(vector: usize, _enabled: bool) {
 ///
 
 pub fn register_handler(vector: usize, handler: crate::irq::IrqHandler) -> bool {
-    /*
     debug!(
-        "register_handler, vector:{:#x?}, handler:{:#x?}",
+        "irq.rs -> register_handler, vector:{:#x?}, handler:{:#x?}",
         vector, handler
     );
-    */
+
     crate::irq::register_handler_common(vector, handler)
 }
 
@@ -66,21 +69,31 @@ pub fn register_handler(vector: usize, handler: crate::irq::IrqHandler) -> bool 
 /// up in the IRQ handler table and calls the corresponding handler. If
 /// necessary, it also acknowledges the interrupt controller after handling.
 pub fn dispatch_irq(vector: usize) {
-    // debug!("inside dispatch_irq,vector:{}", vector);
+    debug!("irq.rs -> dispatch_irq,vector:{}", vector);
     crate::irq::dispatch_irq_common(vector);
 }
 
 pub(super) fn init_primary() {
     // enable soft interrupts, timer interrupts, and external interrupts
-
+    debug!("irq.rs -> init_primary");
+    debug!(
+        "irq.rs -> init_primary, before disable_irqs, irq = {}, pie = {}",
+        loongarch64::register::crmd::Crmd::read().get_ie(),
+        loongarch64::register::prmd::Prmd::read().get_pie()
+    );
     disable_irqs();
-
-    Tcfg::read()
-        .set_enable(true)
-        .set_loop(false)
-        .set_initval(800000000 as usize)
-        .write(); //设置计时器的配置
-
+    debug!(
+        "irq.rs -> init_primary, after disable_irqs, irq = {}, pie = {}",
+        loongarch64::register::crmd::Crmd::read().get_ie(),
+        loongarch64::register::prmd::Prmd::read().get_pie()
+    );
+    /*
+        Tcfg::read()
+            .set_enable(true)
+            .set_loop(false)
+            .set_initval(800000000 as usize)
+            .write(); //设置计时器的配置
+    */
     unsafe {
         // extioi_init();
         //ls7a_intc_init();

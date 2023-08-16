@@ -37,6 +37,7 @@ impl<const N: usize> HandlerTable<N> {
     /// Returns `true` if the event is handled, `false` if no handler is
     /// registered for the given index.
     pub fn handle(&self, idx: usize) -> bool {
+        log::debug!("handler_table -> lib.rs -> handle, idx = {}", idx);
         let handler = self.handlers[idx].load(Ordering::Acquire);
         if handler != 0 {
             let handler: Handler = unsafe { core::mem::transmute(handler) };

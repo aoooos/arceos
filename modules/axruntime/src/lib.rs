@@ -252,7 +252,7 @@ fn remap_kernel_memory() -> Result<(), axhal::paging::PagingError> {
 
 #[cfg(feature = "irq")]
 fn init_interrupt() {
-    info!("init_interrupt");
+    debug!("axruntime -> init_interrupt");
     use axhal::time::TIMER_IRQ_NUM;
 
     // Setup timer interrupt handler
@@ -263,7 +263,7 @@ fn init_interrupt() {
     static NEXT_DEADLINE: u64 = 0;
 
     fn update_timer() {
-        info!("update_timer");
+        debug!("axruntime -> update_timer");
         let now_ns = axhal::time::current_time_nanos();
         // Safety: we have disabled preemption in IRQ handler.
         let mut deadline = unsafe { NEXT_DEADLINE.read_current_raw() };
@@ -280,7 +280,7 @@ fn init_interrupt() {
         axtask::on_timer_tick();
     });
 
-    //info!("init_interrupt -> enable_irqs");
+    debug!("axruntime -> init_interrupt -> enable_irqs");
     // Enable IRQs before starting app
     axhal::arch::enable_irqs();
 }

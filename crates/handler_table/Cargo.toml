@@ -12,3 +12,4 @@ keywords = ["arceos", "event", "lock-free"]
 categories = ["no-std"]
 
 [dependencies]
+log = "0.4"

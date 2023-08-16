@@ -33,22 +33,29 @@ pub fn set_oneshot_timer(deadline_ns: u64) {
     use loongarch64::register::tcfg::Tcfg;
     use loongarch64::register::ticlr::Ticlr;
 
-    // debug!("set_oneshot_timer");
-    Ticlr::read().clear_timer().write(); //清除时钟中断
-    Tcfg::read()
-        .set_enable(true)
-        .set_loop(false)
-        .set_initval(nanos_to_ticks(deadline_ns) as usize)
-        .write();
+    debug!("time.rs -> set_oneshot_timer");
+    Tcfg::read().set_initval(8000000000 as usize).write();
+    debug!("reset tcfg");
 }
 
 pub(super) fn init_primary() {
     #[cfg(feature = "irq")]
     {
+        debug!("time.rs -> init_primary");
+        debug!(
+            "time.rs -> init_primary, before disable_irqs, irq = {}, pie = {}",
+            Crmd::read().get_ie(),
+            loongarch64::register::prmd::Prmd::read().get_pie()
+        );
+
         use crate::arch::disable_irqs;
         disable_irqs();
-
         Ticlr::read().clear_timer().write(); //清除时钟中断
+        debug!(
+            "time.rs -> init_primary, after disable_irqs, irq = {}, pie = {}",
+            Crmd::read().get_ie(),
+            loongarch64::register::prmd::Prmd::read().get_pie()
+        );
 
         /*
                Tcfg::read()

@@ -35,9 +35,27 @@ unsafe extern "C" fn rust_entry_secondary(cpu_id: usize) {
 ///
 /// For example, the interrupt controller and external interrupts.
 pub fn platform_init() {
+    use loongarch64::register::csr::Register;
     #[cfg(feature = "irq")]
-    self::irq::init_primary();
-    self::time::init_primary();
+    {
+        debug!(
+            "mod.rs -> platform_init, before irq::init_primary(), irq = {}, pie = {}",
+            loongarch64::register::crmd::Crmd::read().get_ie(),
+            loongarch64::register::prmd::Prmd::read().get_pie()
+        );
+        self::irq::init_primary();
+        debug!(
+            "mod.rs -> platform_init, after irq::init_primary(), before time::init_primary(), irq = {}, pie = {}",
+            loongarch64::register::crmd::Crmd::read().get_ie(),
+            loongarch64::register::prmd::Prmd::read().get_pie()
+        );
+        self::time::init_primary();
+        debug!(
+            "mod.rs -> platform_init, after time::init_primary(), irq = {}, pie = {}",
+            loongarch64::register::crmd::Crmd::read().get_ie(),
+            loongarch64::register::prmd::Prmd::read().get_pie()
+        );
+    }
 }
 
 /// Initializes the platform devices for secondary CPUs.

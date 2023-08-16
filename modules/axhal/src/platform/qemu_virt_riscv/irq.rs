@@ -37,6 +37,7 @@ macro_rules! with_cause {
 
 /// Enables or disables the given IRQ.
 pub fn set_enable(scause: usize, _enabled: bool) {
+    debug!("irqs.rs -> set_enable");
     if scause == S_EXT {
         // TODO: set enable in PLIC
     }
@@ -47,6 +48,10 @@ pub fn set_enable(scause: usize, _enabled: bool) {
 /// It also enables the IRQ if the registration succeeds. It returns `false` if
 /// the registration failed.
 pub fn register_handler(scause: usize, handler: IrqHandler) -> bool {
+    debug!(
+        "irq.rs -> register_handler, vector:{:#x?}, handler:{:#x?}",
+        scause, handler
+    );
     with_cause!(
         scause,
         @TIMER => if !TIMER_HANDLER.is_init() {
@@ -65,6 +70,7 @@ pub fn register_handler(scause: usize, handler: IrqHandler) -> bool {
 /// up in the IRQ handler table and calls the corresponding handler. If
 /// necessary, it also acknowledges the interrupt controller after handling.
 pub fn dispatch_irq(scause: usize) {
+    debug!("irq.rs -> dispatch_irq, vector:{}", scause);
     with_cause!(
         scause,
         @TIMER => {
@@ -77,6 +83,7 @@ pub fn dispatch_irq(scause: usize) {
 
 pub(super) fn init_percpu() {
     // enable soft interrupts, timer interrupts, and external interrupts
+    debug!("irq.rs -> init_primary");
     unsafe {
         sie::set_ssoft();
         sie::set_stimer();
